@@ -1,0 +1,2 @@
+# Dev-only dependency shims (Windows junctions into the installed DSH tree).
+plugin/node_modules/
