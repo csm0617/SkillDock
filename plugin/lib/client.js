@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b18";
+		const BUILD = "b19";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -358,17 +358,19 @@ window.__ModuleLoader__.load({
 				whiteSpace: "nowrap",
 			},
 			// The English name is what the row is actually about — it is the skill's
-			// canonical, invocable identity — so it carries the primary (black)
-			// weight. The alias only leads it positionally, for recognition, and is
-			// deliberately quieter. The column is fixed-width (ALIAS_COL) rather
-			// than content-sized so the English name sits at the same x in every
-			// row, aliased or not; S.desc indents by ALIAS_COL + the row gap.
+			// canonical, invocable identity — so it carries the strongest text
+			// colour. It is `secondary` (#61666b), not `primary` (#0f1115): a plain
+			// dark grey reads calmer in a long list than near-black.
+			// The alias only leads it positionally, for recognition, and sits one
+			// step quieter again. The column is fixed-width (ALIAS_COL) rather than
+			// content-sized so the English name sits at the same x in every row,
+			// aliased or not; S.desc indents by ALIAS_COL + the row gap.
 			aliasLead: {
 				flex: "none",
 				width: ALIAS_COL,
 				fontSize: "13px",
 				fontWeight: 500,
-				color: "var(--dsw-alias-label-secondary)",
+				color: "var(--dsw-alias-label-tertiary)",
 				overflow: "hidden",
 				textOverflow: "ellipsis",
 				whiteSpace: "nowrap",
@@ -376,12 +378,12 @@ window.__ModuleLoader__.load({
 			// Keeps the column occupied on rows whose skill has no alias, so those
 			// rows do not shift left relative to their aliased neighbours.
 			aliasSpacer: { flex: "none", width: ALIAS_COL },
-			// The canonical skill name. Primary colour on every row, aliased or
-			// not — the alias beside it never changes how strongly it reads.
+			// The canonical skill name. One colour on every row, aliased or not —
+			// the alias beside it never changes how strongly the name reads.
 			namePrimary: {
 				fontSize: "13px",
 				fontWeight: 500,
-				color: "var(--dsw-alias-label-primary)",
+				color: "var(--dsw-alias-label-secondary)",
 			},
 			foot: {
 				display: "flex",
