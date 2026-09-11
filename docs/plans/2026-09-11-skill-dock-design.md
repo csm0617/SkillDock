@@ -149,7 +149,7 @@ interface Config {
 
 ### 5.2 弹出面板（`SkillPicker`）
 
-- 顶部：搜索框（占位文案就是「搜索技能」，输入框为 `--dsw-specific-tip` 填充样式）。**匹配是分级排序，不是简单子串**（实测教训：对所有技能做描述子串匹配时，单个字母 `c` 几乎命中全部技能）：
+- 顶部：搜索框（**原生 `placeholder`="搜索技能"**，因此光标停在提示文字之前、输入后提示自动消失，与 composer 一致；占位色用一条注入的 `::placeholder` 规则绑定 `--dsw-alias-label-caption`，因为内联样式触达不到伪元素）。搜索图标复用 DSH 内置的 `IconSearchOutline16`（`@deepseek-ai/dsh-client-ui-primitives`），解析失败时降级为几何一致的内联 SVG。**匹配是分级排序，不是简单子串**（实测教训：对所有技能做描述子串匹配时，单个字母 `c` 几乎命中全部技能）：
   1. 技能名 `startsWith`；2. 技能名按 `-` 分段后任一段 `startsWith`（`review` 能命中 `code-review-quality`）；3. 别名 `startsWith`；4. 技能名包含；5. 别名包含；6. **描述包含——仅当查询长度 ≥ 2**。同级内按名称排序；占位文案不暴露别名机制。
 - **没有分类 tab 行**：分类切换由 dock 行的 chip 完成（面板上方那条），面板内再放一排 tab 属重复信息（实测反馈后删除）。「未分类」作为 dock 行上的一个 chip 呈现（受 `picker.showUncategorized` 控制）。
 - 技能行：名称 + 描述（截断），**行右侧展示别名**（次要色，未设别名则不占位）；左侧勾选态表示该技能是否已在草稿中被引用。

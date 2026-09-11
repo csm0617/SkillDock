@@ -32,6 +32,25 @@ window.__ModuleLoader__.load({
 			PRIMITIVES = null;
 		}
 
+		/** Style tag id: the official bundles inject CSS the same way. */
+		const CSS_ID = "dsh-plugin-skill-dock/search.css";
+
+		/**
+		 * Inline styles cannot reach a native `::placeholder`, and the native
+		 * placeholder is what puts the caret BEFORE the hint text (the composer
+		 * behaves this way). Inject the one rule that colors it.
+		 */
+		function installStyles() {
+			if (typeof document === "undefined") return;
+			if (document.querySelector('style[data-plugin-css="' + CSS_ID + '"]') !== null) return;
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin-skill-dock";
+			tag.dataset.pluginCss = CSS_ID;
+			tag.textContent =
+				".skill-dock-search-input::placeholder{color:var(--dsw-alias-label-caption);opacity:1}";
+			document.head.appendChild(tag);
+		}
+
 		/** Search glyph: DSH's icon when available, otherwise a matching inline one. */
 		function SearchGlyph() {
 			if (PRIMITIVES && PRIMITIVES.IconSearchOutline16) return h(PRIMITIVES.IconSearchOutline16, { size: 14 });
@@ -656,11 +675,11 @@ window.__ModuleLoader__.load({
 						"div",
 						{ style: S.search },
 						h(SearchGlyph, null),
-						query ? null : h("span", null, "搜索技能"),
 						h("input", {
+							className: "skill-dock-search-input",
 							style: S.searchInput,
 							value: query,
-							placeholder: "",
+							placeholder: "搜索技能",
 							"aria-label": "搜索技能",
 							onChange: (event) => setQuery(event.target.value),
 							autoFocus: true,
@@ -940,6 +959,8 @@ window.__ModuleLoader__.load({
 		 * ------------------------------------------------------------------ */
 
 		function apply(ctx) {
+			installStyles();
+
 			// One settings scope per plugin: the durable home of categories,
 			// aliases, pins, and the entry layout.
 			const scope = ctx.settingsScope.bind({ namespace: "skill-dock" });
