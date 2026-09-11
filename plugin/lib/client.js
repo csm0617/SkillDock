@@ -183,12 +183,22 @@ window.__ModuleLoader__.load({
 				fontSize: "13px",
 				lineHeight: "20px",
 			},
-			list: { maxHeight: "258px", overflowY: "auto", padding: "4px 6px" },
+			// Fixed to exactly four skill rows (4 x 56px) plus the list's own
+			// vertical padding, so the panel keeps one height whether the list has
+			// zero, four, or forty entries; overflow scrolls inside.
+			list: {
+				height: "232px",
+				overflowY: "auto",
+				padding: "4px 6px",
+				boxSizing: "border-box",
+			},
 			item: {
 				display: "flex",
 				alignItems: "center",
 				gap: "10px",
 				padding: "8px",
+				minHeight: "56px",
+				boxSizing: "border-box",
 				borderRadius: "8px",
 				cornerShape: "round",
 				cursor: "pointer",
