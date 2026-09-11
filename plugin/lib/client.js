@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b29";
+		const BUILD = "b30";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -445,18 +445,23 @@ window.__ModuleLoader__.load({
 		 * ------------------------------------------------------------------ */
 
 		const C = {
+			// Exactly the official card declaration: border-radius only (no
+			// `corner-shape`, no `overflow`) — adding either made the 16px outline
+			// render heavier than the neighbouring cards.
 			card: {
 				border: "0.5px solid var(--dsw-alias-border-l4)",
-				borderRadius: "16px",
-				cornerShape: "round",
-				overflow: "hidden",
 				background: "var(--dsw-alias-bg-layer-3)",
+				borderRadius: "16px",
+				listStyle: "none",
+				transition: "border-color .16s,background .16s",
 			},
-			// Open state lifts the card onto layer-2 and darkens its edge, exactly
-			// like the official cards (cardOpen).
+			// Open state only lifts the background a layer. The border is left at the
+			// closed value on purpose: darkening it to `label-dimmed` (what the
+			// official card does) made this card's outline visibly heavier than the
+			// neighbouring settings cards, which is exactly what we were asked to
+			// avoid. One hairline, in both states.
 			cardOpen: {
 				background: "var(--dsw-alias-bg-layer-2)",
-				borderColor: "var(--dsw-alias-label-dimmed)",
 			},
 			// The header is the collapse control (an official card header is a
 			// <button>): full width, no chrome of its own.
@@ -941,9 +946,11 @@ window.__ModuleLoader__.load({
 				);
 
 			// Collapse state is view-only: it is not configuration, so it is not
-			// persisted into the settings namespace. Defaults to open, so the card
-			// keeps showing its contents until the user folds it away.
-			const [open, setOpen] = react.useState(true);
+			// persisted into the settings namespace. Starts collapsed so the card
+			// sits as one compact row among the other setting cards — and, because
+			// the open state darkens the border, collapsing is also what keeps its
+			// outline identical to theirs.
+			const [open, setOpen] = react.useState(false);
 
 			const movePin = (id, delta) => {
 				const order = pinned.indexOf(id) >= 0 ? pinned.slice() : pinned.concat([id]);
@@ -1082,8 +1089,10 @@ window.__ModuleLoader__.load({
 					control,
 				);
 
+			// An official card is a <li> inside the section's <ul>: matching that
+			// keeps list semantics valid (a <div> there is not allowed content).
 			return h(
-				"div",
+				"li",
 				{
 					style: open ? Object.assign({}, C.card, C.cardOpen) : C.card,
 					className: "skill-dock-root",
@@ -1099,7 +1108,7 @@ window.__ModuleLoader__.load({
 					h(
 						"div",
 						{ style: C.headText },
-						h("div", { style: C.headName }, "SkillDock · 技能分类"),
+						h("div", { style: C.headName }, "技能分类"),
 						h(
 							"div",
 							{ style: C.headDesc },
