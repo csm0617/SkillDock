@@ -37,7 +37,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b8";
+		const BUILD = "b9";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -62,9 +62,11 @@ window.__ModuleLoader__.load({
 				// draw our own only for keyboard focus (`:focus-visible`), so a
 				// mouse click on a chip no longer leaves a heavy outline.
 				".skill-dock-root button:focus{outline:none}" +
-				// `!important` because the element carries an inline `outline: none`;
-				// this keeps keyboard focus visible without re-enabling the mouse ring.
-				".skill-dock-root button:focus-visible{outline:2px solid var(--dsw-alias-label-tertiary) !important;outline-offset:-2px}";
+				// No ring on chips at all: a clicked chip is also `:focus-visible`
+				// in some browsers, which drew an unwanted frame around the
+				// selected category. Keyboard focus is signalled with a background
+				// tint instead of an outline.
+				".skill-dock-root button:focus-visible{outline:none !important;background:var(--dsw-alias-interactive-bg-hover)}";
 			if (!existing) document.head.appendChild(tag);
 		}
 
