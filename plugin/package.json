@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-skill-dock",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "SkillDock — skill categories and a skill picker docked in the DSH web composer",
   "type": "module",
