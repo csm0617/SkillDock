@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>SkillDock UI 预览</title>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#ffffff; --chip:#f2f3f5; --chip-hover:#e9eaec;
+    --line:#e6e7e9; --text:#1c1d1f; --muted:#8a8d93; --accent:#3b6ef5;
+    --shadow:0 8px 24px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:28px; background:#fafafa; color:var(--text);
+    font:14px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+  }
+  h1{font-size:18px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+  .stage{max-width:760px;margin:0 auto 34px;background:var(--bg);border:1px solid var(--line);
+         border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .stage h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 14px;letter-spacing:.02em}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ── 通用 chip ───────────────────────────── */
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);color:#3d4046;
+        border:none;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+  .chip:hover{background:var(--chip-hover)}
+  .chip .caret{opacity:.5;font-size:10px}
+  .chip.on{background:#e8efff;color:#2450c8}
+  .chip.ghost{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+  .badge{background:var(--accent);color:#fff;border-radius:999px;font-size:11px;
+         min-width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+
+  /* ── dock 行（composer 卡片上方）─────────── */
+  .dock{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;
+        padding:9px 12px;background:#fcfcfd;margin-bottom:10px}
+  .dock .label{font-size:12px;color:var(--muted);margin-right:2px}
+  .dock .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;
+              border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
+  .dock .pill:hover{background:var(--chip)}
+  .dot{width:8px;height:8px;border-radius:3px;display:inline-block}
+
+  /* ── composer 卡片 ──────────────────────── */
+  .composer{border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px 14px;
+            box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .draft{min-height:44px;color:#3d4046;font-size:14px;padding:2px 2px 10px}
+  .token{display:inline-block;background:#eaf0ff;color:#2b56d4;border-radius:6px;padding:1px 7px;
+         font-family:ui-monospace,Consolas,monospace;font-size:12.5px;margin-right:4px}
+  .placeholder{color:#a9adb4}
+  .toolrow{display:flex;align-items:center;gap:8px;border-top:1px solid #f0f1f3;padding-top:10px}
+  .toolrow .spacer{flex:1}
+  .icon-btn{width:30px;height:30px;border-radius:999px;background:var(--chip);border:none;cursor:pointer;
+            display:inline-flex;align-items:center;justify-content:center;font-size:15px;color:#4b4f56}
+  .send{width:30px;height:30px;border-radius:999px;background:#d9dbe0;border:none;color:#fff;
+        display:inline-flex;align-items:center;justify-content:center}
+
+  /* ── 弹出面板 ────────────────────────────── */
+  .popover{width:360px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+           box-shadow:var(--shadow);overflow:hidden}
+  .search{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid #f0f1f3;
+          color:var(--muted);font-size:13px}
+  .tabs{display:flex;gap:6px;padding:10px 12px;overflow:hidden;border-bottom:1px solid #f4f5f7}
+  .tab{background:var(--chip);border:none;border-radius:999px;padding:5px 11px;font-size:12.5px;
+       color:#4b4f56;cursor:pointer;white-space:nowrap}
+  .tab.on{background:#e8efff;color:#2450c8;font-weight:600}
+  .list{max-height:250px;overflow:auto;padding:6px 0}
+  .item{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;cursor:pointer}
+  .item:hover{background:#f8f9fb}
+  .cbx{width:15px;height:15px;border-radius:4px;border:1.5px solid #c8cbd0;flex:0 0 auto;
+       margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+  .cbx.on{background:var(--accent);border-color:var(--accent)}
+  .tag-draft{font-size:10.5px;color:#8a8d93;border:1px solid var(--line);border-radius:5px;
+             padding:0 5px;margin-left:6px;vertical-align:1px}
+  .glyph{width:20px;height:20px;border-radius:5px;flex:0 0 auto;display:flex;align-items:center;
+         justify-content:center;color:#fff;font-size:11px;font-weight:700;margin-top:1px}
+  .item .name{font-size:13.5px;color:#1c1d1f}
+  .item .desc{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;
+              white-space:nowrap;max-width:250px}
+  .item.off .name,.item.off .desc{color:#b6b9bf}
+  .check{margin-left:auto;color:var(--accent);font-size:14px;padding-top:2px}
+  .popfoot{border-top:1px solid #f0f1f3;padding:9px 14px;display:flex;justify-content:space-between;
+           color:#4b4f56;font-size:12.5px}
+  .popfoot span{cursor:pointer}
+  .popfoot span:hover{color:var(--accent)}
+
+  /* ── 设置卡片 ────────────────────────────── */
+  .card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .card h3{font-size:13.5px;margin:0;padding:12px 14px;border-bottom:1px solid #f0f1f3;background:#fcfcfd}
+  .card .body{padding:14px}
+  .cat{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);
+       border-radius:9px;margin-bottom:8px}
+  .cat .nm{font-size:13.5px}
+  .cat .cnt{color:var(--muted);font-size:12px}
+  .cat .acts{margin-left:auto;display:flex;gap:12px;color:var(--muted);font-size:12px}
+  .cat .acts span{cursor:pointer}
+  .cat .acts span:hover{color:var(--accent)}
+  .mini{font-size:12px;color:var(--muted);margin:14px 0 8px}
+  .pinrow{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px}
+  .grip{color:#c4c7cc;cursor:grab}
+</style>
+</head>
+<body>
+
+<h1>SkillDock · UI 预览</h1>
+<div class="sub">静态稿，用于确认形态与信息层级（不含真实交互）。视觉对齐 DSH Web 当前风格。</div>
+
+<!-- ① 折叠态：芯片在「工作区内修改」右侧 -->
+<div class="stage">
+  <h2>① 折叠态 —— 芯片位于工具行右侧（conversation.input.right）</h2>
+
+  <div class="composer">
+    <div class="draft"><span class="placeholder">给这个项目写一份 README…</span></div>
+
+    <div class="toolrow">
+      <button class="icon-btn">＋</button>
+      <button class="chip">🛡 工作区内修改 <span class="caret">⌄</span></button>
+      <span class="spacer"></span>
+      <button class="chip on">🏷 开发工具 <span class="badge">2</span> <span class="caret">⌄</span></button>
+      <button class="icon-btn">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ② dock 行 -->
+<div class="stage">
+  <h2>② dock 栏 —— 固定分类行（conversation.input.dock，composer 卡片上方）</h2>
+
+  <div class="dock">
+    <span class="label">技能</span>
+    <span class="pill"><span class="dot" style="background:#5b8def"></span>开发工具</span>
+    <span class="pill"><span class="dot" style="background:#e2a03f"></span>内容创作</span>
+    <span class="pill"><span class="dot" style="background:#4bbf9a"></span>数据分析</span>
+    <span class="pill ghost">＋ 固定分类</span>
+    <span class="spacer" style="flex:1"></span>
+    <span class="pill" style="border-style:dashed;color:#8a8d93">全部技能 ⌄</span>
+  </div>
+
+  <div class="composer">
+    <div class="draft">
+      <span class="token">/tencent-docs</span><span class="token">/cloudstudio-deploy</span>
+      <span class="placeholder">把这两份文档整理成一页摘要…</span>
+    </div>
+    <div class="toolrow">
+      <button class="icon-btn">＋</button>
+      <button class="chip">🛡 工作区内修改 <span class="caret">⌄</span></button>
+      <span class="spacer"></span>
+      <button class="chip on">🏷 开发工具 <span class="badge">2</span> <span class="caret">⌄</span></button>
+      <button class="icon-btn">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 展开面板 -->
+<div class="stage">
+  <h2>③ 展开面板 —— 搜索 + 分类 tab + 勾选，底部「确认插入」统一写入</h2>
+
+  <div class="row" style="align-items:flex-start">
+    <div class="popover">
+      <div class="search">🔍 搜索技能</div>
+      <div class="tabs">
+        <button class="tab on">开发工具</button>
+        <button class="tab">内容创作</button>
+        <button class="tab">数据分析</button>
+        <button class="tab">未分类 3</button>
+      </div>
+      <div class="list">
+        <div class="item">
+          <div class="cbx on">✓</div>
+          <div class="glyph" style="background:#7ec27e">C</div>
+          <div>
+            <div class="name">cloudstudio-deploy <span class="tag-draft">已在输入框</span></div>
+            <div class="desc">Deploy static sites to CloudStudio sandbox</div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="cbx on">✓</div>
+          <div class="glyph" style="background:#68b5c8">T</div>
+          <div>
+            <div class="name">tencent-docs</div>
+            <div class="desc">腾讯文档个人版（docs.qq.com）在线云文档</div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="cbx"></div>
+          <div class="glyph" style="background:#9a9fe0">A</div>
+          <div>
+            <div class="name">ardot-design-core</div>
+            <div class="desc">Foundational workflow and hard rules shared…</div>
+          </div>
+        </div>
+        <div class="item off">
+          <div class="cbx"></div>
+          <div class="glyph" style="background:#c9ccd2">E</div>
+          <div>
+            <div class="name">expert-manager</div>
+            <div class="desc">专家包的全生命周期运营：转化（已失效）</div>
+          </div>
+        </div>
+      </div>
+      <div class="popfoot" style="background:#fcfcfd">
+        <span style="color:#8a8d93">已选 2 项（1 项已在输入框）</span>
+        <span style="display:flex;gap:10px;align-items:center">
+          <span style="color:#8a8d93">取消</span>
+          <button style="background:var(--accent);color:#fff;border:none;border-radius:7px;
+                         padding:5px 12px;font-size:12.5px;cursor:pointer">确认插入</button>
+        </span>
+      </div>
+      <div class="popfoot">
+        <span>＋ 新建分类</span>
+        <span>管理分类与 dock →</span>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:230px">
+      <div class="mini">勾选不直接改动草稿；点「确认插入」后一次性写入对应 <code>/name</code> token。关闭面板＝丢弃未确认的勾选。</div>
+      <div class="composer">
+        <div class="draft">
+          <span class="token">/tencent-docs</span><span class="token">/cloudstudio-deploy</span>
+          <span class="placeholder">继续输入…</span>
+        </div>
+        <div class="toolrow">
+          <button class="icon-btn">＋</button>
+          <button class="chip">🛡 工作区内修改 <span class="caret">⌄</span></button>
+          <span class="spacer"></span>
+          <button class="chip on">🏷 开发工具 <span class="badge">2</span> <span class="caret">⌄</span></button>
+          <button class="icon-btn">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 设置卡片 -->
+<div class="stage">
+  <h2>④ 设置卡片 —— 分类管理 + dock 固定项（settings.plugin.item）</h2>
+
+  <div class="card">
+    <h3>SkillDock · 技能分类</h3>
+    <div class="body">
+      <div class="cat">
+        <span class="dot" style="background:#5b8def;width:10px;height:10px;border-radius:3px"></span>
+        <span class="nm">开发工具</span>
+        <span class="cnt">4 个技能</span>
+        <span class="acts"><span>编辑</span><span>删除</span></span>
+      </div>
+      <div class="cat">
+        <span class="dot" style="background:#e2a03f;width:10px;height:10px;border-radius:3px"></span>
+        <span class="nm">内容创作</span>
+        <span class="cnt">3 个技能</span>
+        <span class="acts"><span>编辑</span><span>删除</span></span>
+      </div>
+      <div class="cat">
+        <span class="dot" style="background:#4bbf9a;width:10px;height:10px;border-radius:3px"></span>
+        <span class="nm">数据分析</span>
+        <span class="cnt">2 个技能</span>
+        <span class="acts"><span>编辑</span><span>删除</span></span>
+      </div>
+      <div class="cat ghost" style="border-style:dashed;justify-content:center;color:#8a8d93">
+        ＋ 新建分类
+      </div>
+
+      <div class="mini">固定在 dock 栏的分类（拖动排序）</div>
+      <div class="pinrow"><span class="grip">⠿</span><input type="checkbox" checked> 开发工具</div>
+      <div class="pinrow"><span class="grip">⠿</span><input type="checkbox" checked> 内容创作</div>
+      <div class="pinrow"><span class="grip">⠿</span><input type="checkbox"> 数据分析</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
