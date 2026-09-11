@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b12";
+		const BUILD = "b13";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -300,7 +300,14 @@ window.__ModuleLoader__.load({
 				borderColor: "transparent",
 			},
 			body: { minWidth: 0, flex: 1 },
-			name: { fontSize: "13px", lineHeight: "20px", color: "var(--dsw-alias-label-primary)" },
+			name: {
+				display: "flex",
+				alignItems: "baseline",
+				gap: "6px",
+				fontSize: "13px",
+				lineHeight: "20px",
+				color: "var(--dsw-alias-label-primary)",
+			},
 			desc: {
 				marginTop: "2px",
 				fontSize: "12px",
@@ -319,6 +326,24 @@ window.__ModuleLoader__.load({
 				overflow: "hidden",
 				textOverflow: "ellipsis",
 				whiteSpace: "nowrap",
+			},
+			// A skill is addressed by its canonical English name, but people
+			// recognise it by the alias they gave it — so the alias leads the row
+			// and carries the emphasis, and the English name follows as a quieter
+			// secondary label. `gap` on S.name supplies the spacing.
+			aliasLead: {
+				flex: "none",
+				fontSize: "13px",
+				fontWeight: 500,
+				color: "var(--dsw-alias-label-primary)",
+				maxWidth: "160px",
+				overflow: "hidden",
+				textOverflow: "ellipsis",
+				whiteSpace: "nowrap",
+			},
+			nameMuted: {
+				fontSize: "12px",
+				color: "var(--dsw-alias-label-tertiary)",
 			},
 			foot: {
 				display: "flex",
@@ -655,12 +680,12 @@ window.__ModuleLoader__.load({
 										h(
 											"div",
 											{ style: S.name },
-											skill.name,
+											aliases[skill.name] ? h("span", { style: S.aliasLead }, aliases[skill.name]) : null,
+											h("span", { style: aliases[skill.name] ? S.nameMuted : null }, skill.name),
 											isInDraft ? h("span", { style: S.alias }, " 已在输入框") : null,
 										),
 										h("div", { style: S.desc }, skill.description || ""),
 									),
-									aliases[skill.name] ? h("span", { style: S.alias }, aliases[skill.name]) : null,
 								);
 							});
 			}
