@@ -47,6 +47,13 @@ window.__ModuleLoader__.load({
 		const ALL = "__all__";
 
 		/**
+		 * Sentinel meaning "skills in no category". It needs its own value:
+		 * `undefined` already means "panel closed", so reusing it made the
+		 * 未分类 chip close the panel instead of opening it.
+		 */
+		const NONE = "__uncategorized__";
+
+		/**
 		 * Last catalog the dock row loaded, shared inside this bundle so the
 		 * settings card can offer the same skill names without a second request.
 		 */
@@ -509,9 +516,9 @@ window.__ModuleLoader__.load({
 					h(
 						"button",
 						{
-							key: "__uncategorized__",
-							style: Object.assign({}, S.pill, openCategory === null ? S.pillActive : null),
-							onClick: () => (openCategory === null ? closePanel() : openPanel(undefined)),
+							key: NONE,
+							style: Object.assign({}, S.pill, openCategory === NONE ? S.pillActive : null),
+							onClick: () => (openCategory === NONE ? closePanel() : openPanel(NONE)),
 						},
 						"未分类",
 					),
@@ -547,9 +554,9 @@ window.__ModuleLoader__.load({
 				const q = query.trim().toLowerCase();
 				const filtered = skills
 					.filter((skill) => {
-						if (openCategory === null && resolveCategory(skill.name, configuredCategories, useDemo) !== undefined)
-							return false;
-						if (typeof openCategory === "string" && openCategory !== ALL) {
+						if (openCategory === NONE) {
+							if (resolveCategory(skill.name, configuredCategories, useDemo) !== undefined) return false;
+						} else if (openCategory !== ALL) {
 							if (resolveCategory(skill.name, configuredCategories, useDemo) !== openCategory) return false;
 						}
 						if (!q) return true;
