@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b28";
+		const BUILD = "b29";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -452,11 +452,32 @@ window.__ModuleLoader__.load({
 				overflow: "hidden",
 				background: "var(--dsw-alias-bg-layer-3)",
 			},
-			// Header block: name + description, not a filled strip.
-			head: {
-				padding: "14px 16px",
-				borderBottom: "0.5px solid var(--dsw-alias-border-l2)",
+			// Open state lifts the card onto layer-2 and darkens its edge, exactly
+			// like the official cards (cardOpen).
+			cardOpen: {
+				background: "var(--dsw-alias-bg-layer-2)",
+				borderColor: "var(--dsw-alias-label-dimmed)",
 			},
+			// The header is the collapse control (an official card header is a
+			// <button>): full width, no chrome of its own.
+			head: {
+				display: "flex",
+				alignItems: "center",
+				gap: "12px",
+				width: "100%",
+				padding: "14px 16px",
+				background: "transparent",
+				border: "none",
+				borderRadius: "12px",
+				cornerShape: "round",
+				font: "inherit",
+				color: "inherit",
+				textAlign: "left",
+				cursor: "pointer",
+				outline: "none",
+			},
+			// Text column of the header, so the chevron is pushed to the right.
+			headText: { display: "flex", flexDirection: "column", flex: 1, gap: "4px", minWidth: 0 },
 			headName: {
 				fontSize: "15px",
 				fontWeight: 600,
@@ -469,6 +490,17 @@ window.__ModuleLoader__.load({
 				lineHeight: 1.5,
 				color: "var(--dsw-alias-label-tertiary)",
 			},
+			chevron: {
+				flex: "none",
+				width: 16,
+				height: 16,
+				color: "var(--dsw-alias-label-tertiary)",
+				transition: "transform .16s",
+			},
+			chevronOpen: { transform: "rotate(180deg)" },
+			// Collapsed cards hide the body entirely; the divider only appears when
+			// the body is actually shown.
+			bodyOpen: { borderTop: "0.5px solid var(--dsw-alias-border-l2)" },
 			body: { padding: "0 16px 8px" },
 			// A field: 12px vertical rhythm, hairline between consecutive fields.
 			field: {
@@ -908,6 +940,11 @@ window.__ModuleLoader__.load({
 					}),
 				);
 
+			// Collapse state is view-only: it is not configuration, so it is not
+			// persisted into the settings namespace. Defaults to open, so the card
+			// keeps showing its contents until the user folds it away.
+			const [open, setOpen] = react.useState(true);
+
 			const movePin = (id, delta) => {
 				const order = pinned.indexOf(id) >= 0 ? pinned.slice() : pinned.concat([id]);
 				const from = order.indexOf(id);
@@ -1047,21 +1084,56 @@ window.__ModuleLoader__.load({
 
 			return h(
 				"div",
-				{ style: C.card, className: "skill-dock-root" },
+				{
+					style: open ? Object.assign({}, C.card, C.cardOpen) : C.card,
+					className: "skill-dock-root",
+				},
 				h(
-					"div",
-					{ style: C.head },
-					h("div", { style: C.headName }, "SkillDock · 技能分类"),
-					h("div", { style: C.headDesc }, "为技能自定义分类与别名，并决定它们在 composer 上方的展示方式。"),
-				),
-				h(
-					"div",
-					{ style: C.body },
-					field(
-						"入口形态",
+					"button",
+					{
+						type: "button",
+						style: C.head,
+						"aria-expanded": open,
+						onClick: () => setOpen((prev) => !prev),
+					},
+					h(
+						"div",
+						{ style: C.headText },
+						h("div", { style: C.headName }, "SkillDock · 技能分类"),
 						h(
 							"div",
-							null,
+							{ style: C.headDesc },
+							"为技能自定义分类与别名，并决定它们在 composer 上方的展示方式。",
+						),
+					),
+					// Inline chevron: rotating the same glyph by 180deg is the
+					// official open/closed signal.
+					h(
+						"svg",
+						{
+							viewBox: "0 0 16 16",
+							width: 16,
+							height: 16,
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: 1.5,
+							strokeLinecap: "round",
+							strokeLinejoin: "round",
+							"aria-hidden": "true",
+							style: Object.assign({}, C.chevron, open ? C.chevronOpen : null),
+						},
+						h("path", { d: "m4 6 4 4 4-4" }),
+					),
+				),
+				open
+					? h(
+							"div",
+							{ style: Object.assign({}, C.body, C.bodyOpen) },
+							field(
+								"入口形态",
+								h(
+									"div",
+									null,
 							h(
 								"label",
 								{ style: C.opt },
@@ -1118,7 +1190,8 @@ window.__ModuleLoader__.load({
 					field("固定在 dock 栏的分类（按顺序展示）", pinNodes),
 
 					h("div", { style: C.status }, dashboardNote),
-				),
+						)
+					: null,
 			);
 		}
 
