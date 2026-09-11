@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b39";
+		const BUILD = "b40";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -529,10 +529,45 @@ window.__ModuleLoader__.load({
 				lineHeight: 1.5,
 				color: "var(--dsw-alias-label-primary)",
 			},
-			// Secondary line under a control. Option rows carry their note inline
-			// through optNote, so no standalone hint style is needed.
-			opt: { display: "flex", alignItems: "center", gap: "8px", padding: "0", fontSize: "13px" },
+			// Note under a control (used by the toggle row).
 			optNote: { fontSize: "12px", lineHeight: 1.5, color: "var(--dsw-alias-label-tertiary)" },
+			// Toggle row: label column on the left, switch pinned right. Values are
+			// the ones DSH uses for its own plugin toggles (the 子代理 card): a
+			// 36x20 track with a 16px thumb that slides 16px.
+			toggleRow: {
+				display: "flex",
+				justifyContent: "space-between",
+				alignItems: "flex-start",
+				gap: "16px",
+				fontSize: "13px",
+				lineHeight: 1.5,
+				color: "var(--dsw-alias-label-primary)",
+			},
+			toggleText: { flex: 1, minWidth: 0 },
+			switchTrack: {
+				boxSizing: "border-box",
+				flex: "none",
+				position: "relative",
+				width: "36px",
+				height: "20px",
+				padding: "2px",
+				background: "var(--dsw-alias-border-l3)",
+				border: 0,
+				borderRadius: "10px",
+				cursor: "pointer",
+				outline: "none",
+			},
+			switchTrackOn: { background: "var(--dsw-alias-brand-primary)" },
+			switchThumb: {
+				display: "block",
+				width: "16px",
+				height: "16px",
+				borderRadius: "50%",
+				cornerShape: "round",
+				background: "var(--dsw-alias-label-primary-foreground)",
+				transition: "transform .12s",
+			},
+			switchThumbOn: { transform: "translate(16px)" },
 			cat: {
 				border: "0.5px solid var(--dsw-alias-border-l2)",
 				borderRadius: "12px",
@@ -1235,23 +1270,51 @@ window.__ModuleLoader__.load({
 							field(
 								"面板入口",
 								h(
-									"label",
-									{ style: C.opt },
-									h("input", {
-										type: "checkbox",
-										checked: showUncategorized,
-										onChange: (event) =>
-											write(
-												"picker",
-												Object.assign({}, config.picker || {}, {
-													showUncategorized: event.target.checked,
-												}),
+									"div",
+									{ style: C.toggleRow },
+									h(
+										"div",
+										{ style: C.toggleText },
+										h("div", null, "展示「未分类」入口"),
+										h("div", { style: C.optNote }, "关闭后 dock 栏不再提供未分类分类芯片"),
+									),
+									// A switch, not a checkbox: this matches the toggle DSH
+									// uses for its own plugin settings (the 子代理 card).
+									// The inner span is the sliding thumb.
+									h(
+										"button",
+										{
+											type: "button",
+											role: "switch",
+											"aria-checked": showUncategorized,
+											"aria-label": "展示「未分类」入口",
+											style: Object.assign(
+												{},
+												C.switchTrack,
+												showUncategorized ? C.switchTrackOn : null,
 											),
-							}),
-							"展示「未分类」入口",
-							h("span", { style: C.optNote }, "关闭后 dock 栏不再提供未分类分类芯片"),
-						),
-					),
+											onClick: () =>
+												write(
+													"picker",
+													Object.assign({}, config.picker || {}, {
+														showUncategorized: !showUncategorized,
+													}),
+												),
+										},
+										h(
+											"span",
+											{
+												style: Object.assign(
+													{},
+													C.switchThumb,
+													showUncategorized ? C.switchThumbOn : null,
+												),
+											},
+										),
+									),
+								),
+								true,
+							),
 
 					field("分类与技能（别名在技能行右侧就地编辑）", nodes),
 
