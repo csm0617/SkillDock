@@ -115,10 +115,6 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 }
 .control:hover{background:var(--dsw-alias-interactive-bg-hover)}
 .control:active{background:var(--dsw-alias-interactive-bg-active)}
-.control.is-active{
-  background:var(--dsw-alias-state-business-tertiary);
-  border-color:transparent;
-}
 .iconbtn{
   width:28px;height:28px;padding:0;
   display:inline-flex;align-items:center;justify-content:center;
@@ -126,15 +122,6 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   color:var(--dsw-alias-label-tertiary);cursor:pointer;font-size:15px;
 }
 .iconbtn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}
-
-/* 计数徽标 */
-.badge{
-  min-width:16px;height:16px;padding:0 4px;
-  display:inline-flex;align-items:center;justify-content:center;
-  background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-inverted);
-  border-radius:999px;corner-shape:round;
-  font:var(--font-xxs-strong-12);font-size:11px;line-height:1;
-}
 
 /* ── dock 行（对齐官方 GoalBar dock：tip 底 + 发丝线 + 12px 圆角 + 36px 高）── */
 .dock{
@@ -300,11 +287,11 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         <button class="iconbtn"><svg class="ico"><use href="#i-plus"/></svg></button>
         <button class="control"><svg class="ico ico-sm"><use href="#i-shield"/></svg> 工作区内修改 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
         <span class="spacer"></span>
-        <button class="control is-active"><svg class="ico ico-sm"><use href="#i-tag"/></svg> 技能分类 <span class="badge">2</span> <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
+        <button class="control"><svg class="ico ico-sm"><use href="#i-tag"/></svg> 技能 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
         <button class="iconbtn"><svg class="ico"><use href="#i-send"/></svg></button>
       </div>
     </div>
-    <p class="hint">芯片紧邻「工作区内修改」的右侧；徽标显示当前输入框内已引用的技能数。</p>
+    <p class="hint">芯片紧邻「工作区内修改」的右侧，样式与它完全一致（白底 + 发丝线 + 深色文字），不显示数量。</p>
   </section>
 
   <!-- ② 形态 B -->
