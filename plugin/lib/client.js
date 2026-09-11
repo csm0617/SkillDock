@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b27";
+		const BUILD = "b28";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -436,65 +436,88 @@ window.__ModuleLoader__.load({
 
 		/* ------------------------------------------------------------------ *
 		 * Settings-card styles                                                *
+		 *                                                                     *
+		 * Mirrors the chrome DSH itself uses for plugin cards (the 子代理 /   *
+		 * 网页搜索 rows in 设置 → 插件). Those values are taken from the      *
+		 * official card stylesheet, not invented: 16px radius, bg-layer-3,    *
+		 * 15px/600 title, 13px/1.5 tertiary description, .5px border-l2       *
+		 * dividers, 34px inputs, and a body inset by 16px.                    *
 		 * ------------------------------------------------------------------ */
 
 		const C = {
 			card: {
-				border: "0.5px solid var(--dsw-alias-border-l1)",
-				borderRadius: "12px",
+				border: "0.5px solid var(--dsw-alias-border-l4)",
+				borderRadius: "16px",
 				cornerShape: "round",
 				overflow: "hidden",
-				background: "var(--dsw-alias-bg-base)",
+				background: "var(--dsw-alias-bg-layer-3)",
 			},
+			// Header block: name + description, not a filled strip.
 			head: {
-				padding: "12px 14px",
-				background: "var(--dsw-specific-tip)",
-				borderBottom: "0.5px solid var(--dsw-alias-border-l1)",
-				fontSize: "13px",
-				fontWeight: 500,
+				padding: "14px 16px",
+				borderBottom: "0.5px solid var(--dsw-alias-border-l2)",
+			},
+			headName: {
+				fontSize: "15px",
+				fontWeight: 600,
+				lineHeight: 1.4,
 				color: "var(--dsw-alias-label-primary)",
 			},
-			body: { padding: "14px" },
-			sub: {
-				margin: "16px 0 8px",
-				fontSize: "12px",
-				fontWeight: 500,
-				color: "var(--dsw-alias-label-caption)",
+			headDesc: {
+				marginTop: "4px",
+				fontSize: "13px",
+				lineHeight: 1.5,
+				color: "var(--dsw-alias-label-tertiary)",
 			},
-			subFirst: {
-				margin: "0 0 8px",
-				fontSize: "12px",
-				fontWeight: 500,
-				color: "var(--dsw-alias-label-caption)",
+			body: { padding: "0 16px 8px" },
+			// A field: 12px vertical rhythm, hairline between consecutive fields.
+			field: {
+				display: "flex",
+				flexDirection: "column",
+				gap: "6px",
+				padding: "12px 0",
 			},
-			opt: { display: "flex", alignItems: "center", gap: "8px", padding: "5px 0", fontSize: "13px" },
-			optNote: { fontSize: "12px", color: "var(--dsw-alias-label-caption)" },
+			fieldDivider: { borderTop: "0.5px solid var(--dsw-alias-border-l2)" },
+			// Field label: 13px/500 primary, matching At1oFq_label.
+			label: {
+				fontSize: "13px",
+				fontWeight: 500,
+				lineHeight: 1.5,
+				color: "var(--dsw-alias-label-primary)",
+			},
+			// Secondary line under a control. Option rows carry their note inline
+			// through optNote, so no standalone hint style is needed.
+			opt: { display: "flex", alignItems: "center", gap: "8px", padding: "0", fontSize: "13px" },
+			optNote: { fontSize: "12px", lineHeight: 1.5, color: "var(--dsw-alias-label-tertiary)" },
 			cat: {
-				border: "0.5px solid var(--dsw-alias-border-l1)",
-				borderRadius: "9px",
+				border: "0.5px solid var(--dsw-alias-border-l2)",
+				borderRadius: "12px",
 				cornerShape: "round",
-				padding: "10px",
+				padding: "10px 12px",
 				marginBottom: "8px",
 			},
 			catHead: { display: "flex", alignItems: "center", gap: "8px" },
+			// 34px tall, radius 8, bg-layer-3, border-l4 — At1oFq_input exactly.
 			input: {
-				height: "26px",
-				padding: "0 8px",
+				height: "34px",
+				padding: "0 12px",
 				fontSize: "13px",
+				lineHeight: 1.5,
 				color: "var(--dsw-alias-label-primary)",
-				background: "var(--dsw-specific-tip)",
-				border: "0.5px solid transparent",
-				borderRadius: "6px",
+				background: "var(--dsw-alias-bg-layer-3)",
+				border: "0.5px solid var(--dsw-alias-border-l4)",
+				borderRadius: "8px",
 				cornerShape: "round",
 				outline: "none",
 			},
 			nameInput: { flex: "0 1 180px" },
 			aliasInput: { flex: "1 1 140px" },
-			catCount: { fontSize: "12px", color: "var(--dsw-alias-label-caption)" },
+			catCount: { fontSize: "12px", lineHeight: 1.5, color: "var(--dsw-alias-label-tertiary)" },
 			linkBtn: {
 				marginLeft: "auto",
 				fontSize: "12px",
-				color: "var(--dsw-alias-label-tertiary)",
+				lineHeight: 1.5,
+				color: "var(--dsw-alias-label-secondary)",
 				background: "transparent",
 				border: "none",
 				cursor: "pointer",
@@ -507,26 +530,29 @@ window.__ModuleLoader__.load({
 				color: "var(--dsw-alias-label-primary)",
 				fontFamily: "ui-monospace, Consolas, monospace",
 			},
-			empty: { fontSize: "12px", color: "var(--dsw-alias-label-caption)", padding: "2px 0" },
+			empty: { fontSize: "12px", lineHeight: 1.5, color: "var(--dsw-alias-label-tertiary)", padding: "2px 0" },
 			adder: { display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" },
 			select: {
-				height: "26px",
+				height: "34px",
 				fontSize: "13px",
+				lineHeight: 1.5,
 				color: "var(--dsw-alias-label-primary)",
-				background: "var(--dsw-specific-tip)",
-				border: "0.5px solid transparent",
-				borderRadius: "6px",
+				background: "var(--dsw-alias-bg-layer-3)",
+				border: "0.5px solid var(--dsw-alias-border-l4)",
+				borderRadius: "8px",
 				cornerShape: "round",
 				maxWidth: "260px",
 			},
+			// Primary action, matching the official card's dark filled button.
 			addBtn: {
-				height: "26px",
-				padding: "0 10px",
+				height: "30px",
+				padding: "0 14px",
 				fontSize: "13px",
-				color: "var(--dsw-alias-label-inverted)",
-				background: "var(--dsw-alias-button-info-fill)",
-				border: "0.5px solid transparent",
-				borderRadius: "6px",
+				lineHeight: 1.5,
+				color: "var(--dsw-alias-bg-layer-3)",
+				background: "var(--dsw-alias-label-primary)",
+				border: "1px solid transparent",
+				borderRadius: "8px",
 				cornerShape: "round",
 				cursor: "pointer",
 				outline: "none",
@@ -536,12 +562,13 @@ window.__ModuleLoader__.load({
 				alignItems: "center",
 				justifyContent: "center",
 				gap: "6px",
-				padding: "9px",
+				height: "34px",
 				border: "0.5px dashed var(--dsw-alias-border-l4)",
-				borderRadius: "9px",
+				borderRadius: "8px",
 				cornerShape: "round",
-				color: "var(--dsw-alias-label-tertiary)",
-				fontSize: "12px",
+				color: "var(--dsw-alias-label-secondary)",
+				fontSize: "13px",
+				lineHeight: 1.5,
 				cursor: "pointer",
 				background: "transparent",
 				width: "100%",
@@ -550,11 +577,17 @@ window.__ModuleLoader__.load({
 			pinMove: {
 				background: "transparent",
 				border: "none",
-				color: "var(--dsw-alias-label-tertiary)",
+				color: "var(--dsw-alias-label-secondary)",
 				cursor: "pointer",
 				fontSize: "12px",
 			},
-			status: { fontSize: "12px", color: "var(--dsw-alias-label-caption)", marginTop: "10px" },
+			status: {
+				borderTop: "0.5px solid var(--dsw-alias-border-l2)",
+				paddingTop: "12px",
+				fontSize: "12px",
+				lineHeight: 1.5,
+				color: "var(--dsw-alias-label-tertiary)",
+			},
 		};
 
 		/* ------------------------------------------------------------------ *
@@ -990,75 +1023,101 @@ window.__ModuleLoader__.load({
 					})
 				: [h("div", { key: "none", style: C.empty }, "还没有分类")];
 
+			// Status line: sync state, catalog hint, and the build marker that ties a
+			// screenshot to a bundle revision.
+			const dashboardNote =
+				(status === "ready"
+					? "配置已同步到 Host" + (snapshot && snapshot.writable === false ? "（只读）" : "")
+					: status === "loading"
+						? "正在读取配置…"
+						: "配置命名空间不可用") +
+				(CATALOG.names.length === 0 ? " · 打开一个会话后会加载技能列表用于选择" : "") +
+				" · " +
+				BUILD;
+
+			// Fields separated by a hairline, mirroring the official card where
+			// consecutive fields carry `border-top: .5px solid border-l2`.
+			const field = (label, control, isFirst) =>
+				h(
+					"div",
+					{ style: isFirst ? C.field : Object.assign({}, C.field, C.fieldDivider) },
+					h("div", { style: C.label }, label),
+					control,
+				);
+
 			return h(
 				"div",
 				{ style: C.card, className: "skill-dock-root" },
-				h("div", { style: C.head }, "SkillDock · 技能分类"),
+				h(
+					"div",
+					{ style: C.head },
+					h("div", { style: C.headName }, "SkillDock · 技能分类"),
+					h("div", { style: C.headDesc }, "为技能自定义分类与别名，并决定它们在 composer 上方的展示方式。"),
+				),
 				h(
 					"div",
 					{ style: C.body },
-					h("div", { style: C.subFirst }, "入口形态"),
-					h(
-						"label",
-						{ style: C.opt },
-						h("input", {
-							type: "radio",
-							name: "skill-dock-layout",
-							checked: layout === "row",
-							onChange: () => write("entry", Object.assign({}, config.entry || {}, { layout: "row" })),
-						}),
-						"一排分类芯片",
-						h("span", { style: C.optNote }, "默认 · composer 卡片上方整行"),
-					),
-					h(
-						"label",
-						{ style: C.opt },
-						h("input", {
-							type: "radio",
-							name: "skill-dock-layout",
-							checked: layout === "chip",
-							onChange: () => write("entry", Object.assign({}, config.entry || {}, { layout: "chip" })),
-						}),
-						"单个总芯片",
-						h("span", { style: C.optNote }, "composer 卡片内 · 工具行右侧"),
-					),
-
-					h("div", { style: C.sub }, "面板入口"),
-					h(
-						"label",
-						{ style: C.opt },
-						h("input", {
-							type: "checkbox",
-							checked: showUncategorized,
-							onChange: (event) =>
-								write(
-									"picker",
-									Object.assign({}, config.picker || {}, {
-										showUncategorized: event.target.checked,
-									}),
-								),
-						}),
-						"展示「未分类」入口",
-						h("span", { style: C.optNote }, "关闭后 dock 栏不再提供未分类分类芯片"),
+					field(
+						"入口形态",
+						h(
+							"div",
+							null,
+							h(
+								"label",
+								{ style: C.opt },
+								h("input", {
+									type: "radio",
+									name: "skill-dock-layout",
+									checked: layout === "row",
+									onChange: () =>
+										write("entry", Object.assign({}, config.entry || {}, { layout: "row" })),
+								}),
+								"一排分类芯片",
+								h("span", { style: C.optNote }, "默认 · composer 卡片上方整行"),
+							),
+							h(
+								"label",
+								{ style: C.opt },
+								h("input", {
+									type: "radio",
+									name: "skill-dock-layout",
+									checked: layout === "chip",
+									onChange: () =>
+										write("entry", Object.assign({}, config.entry || {}, { layout: "chip" })),
+								}),
+								"单个总芯片",
+								h("span", { style: C.optNote }, "composer 卡片内 · 工具行右侧"),
+							),
+						),
+						true,
 					),
 
-					h("div", { style: C.sub }, "分类与技能（别名在技能行右侧就地编辑）"),
-					nodes,
-
-					h("div", { style: C.sub }, "固定在 dock 栏的分类（按顺序展示）"),
-					pinNodes,
-
-					h(
-						"div",
-						{ style: C.status },
-						status === "ready"
-							? "配置已同步到 Host" + (snapshot && snapshot.writable === false ? "（只读）" : "")
-							: status === "loading"
-								? "正在读取配置…"
-								: "配置命名空间不可用",
-						CATALOG.names.length === 0 ? " · 打开一个会话后会加载技能列表用于选择" : "",
-						" · " + BUILD,
+					field(
+						"面板入口",
+						h(
+							"label",
+							{ style: C.opt },
+							h("input", {
+								type: "checkbox",
+								checked: showUncategorized,
+								onChange: (event) =>
+									write(
+										"picker",
+										Object.assign({}, config.picker || {}, {
+											showUncategorized: event.target.checked,
+										}),
+									),
+							}),
+							"展示「未分类」入口",
+							h("span", { style: C.optNote }, "关闭后 dock 栏不再提供未分类分类芯片"),
+						),
 					),
+
+					field("分类与技能（别名在技能行右侧就地编辑）", nodes),
+
+					field("固定在 dock 栏的分类（按顺序展示）", pinNodes),
+
+					h("div", { style: C.status }, dashboardNote),
 				),
 			);
 		}
