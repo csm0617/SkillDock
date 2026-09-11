@@ -114,7 +114,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   cursor:pointer;white-space:nowrap;
 }
 .control:hover{background:var(--dsw-alias-interactive-bg-hover)}
-.control .caret{color:var(--dsw-alias-label-caption);font-size:10px}
+.control:active{background:var(--dsw-alias-interactive-bg-active)}
 .control.is-active{
   background:var(--dsw-alias-state-business-tertiary);
   border-color:transparent;
@@ -160,7 +160,11 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 .pill:hover{background:var(--dsw-alias-interactive-bg-hover)}
 .pill.is-active{background:var(--dsw-alias-state-business-tertiary);border-color:transparent}
 .pill.is-muted{border-style:dashed;border-color:var(--dsw-alias-border-l4);color:var(--dsw-alias-label-tertiary);background:transparent}
-.dot{width:8px;height:8px;border-radius:2px;corner-shape:round;display:inline-block}
+
+/* 单色线性图标：继承 currentColor，不做彩色图标 */
+.ico{width:14px;height:14px;flex:none;display:block;color:currentColor}
+.ico-sm{width:12px;height:12px}
+.sprite{display:none}
 
 /* ── popover 面板（官方：border:0 + elevation-panel）── */
 .popover{
@@ -202,15 +206,10 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   width:15px;height:15px;margin-top:3px;flex:none;
   border:.5px solid var(--dsw-alias-border-l4);border-radius:4px;corner-shape:round;
   display:flex;align-items:center;justify-content:center;
-  color:var(--dsw-alias-label-inverted);font-size:10px;
+  color:var(--dsw-alias-label-inverted);
 }
+.cbx .ico{width:10px;height:10px}
 .cbx.is-on{background:var(--dsw-alias-state-business-primary);border-color:transparent}
-.glyph{
-  width:20px;height:20px;margin-top:1px;flex:none;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:5px;corner-shape:round;
-  color:var(--dsw-alias-label-inverted);font:var(--font-xxs-strong-12);font-size:11px;
-}
 .item .body{min-width:0}
 .item .name{font:var(--font-xs-13);color:var(--dsw-alias-label-primary)}
 .item .desc{
@@ -266,7 +265,8 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 .cat .acts span{cursor:pointer}
 .cat .acts span:hover{color:var(--dsw-alias-state-business-primary)}
 .cat.add{
-  justify-content:center;border-style:dashed;border-color:var(--dsw-alias-border-l4);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  border-style:dashed;border-color:var(--dsw-alias-border-l4);
   color:var(--dsw-alias-label-tertiary);font:var(--font-xxs-12);cursor:pointer;
 }
 .sub{margin:16px 0 8px;font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption)}
@@ -276,6 +276,16 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 </style>
 </head>
 <body>
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 3.5v9M3.5 8h9"/></symbol>
+  <symbol id="i-send" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8h10M8.5 4l4 4-4 4"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5l4-4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.25"/><path d="m10.2 10.2 3.3 3.3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 2.2 13 4v4c0 3-2.2 5.2-5 5.8C5.2 13.2 3 11 3 8V4l5-1.8Z"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.6 7.3V3.4c0-.4.3-.7.7-.7h3.9c.2 0 .4.1.5.2l5.4 5.4c.3.3.3.7 0 1l-3.9 3.9c-.3.3-.7.3-1 0L2.8 7.8a.7.7 0 0 1-.2-.5Z"/><circle cx="5.6" cy="5.6" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="4" r="1"/><circle cx="10" cy="4" r="1"/><circle cx="6" cy="8" r="1"/><circle cx="10" cy="8" r="1"/><circle cx="6" cy="12" r="1"/><circle cx="10" cy="12" r="1"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></symbol>
+</svg>
 <div class="page">
 
   <h1>SkillDock · UI 预览</h1>
@@ -287,11 +297,11 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
     <div class="composer">
       <div class="draft"><span class="placeholder">给这个项目写一份 README…</span></div>
       <div class="toolrow">
-        <button class="iconbtn">＋</button>
-        <button class="control">工作区内修改 <span class="caret">⌄</span></button>
+        <button class="iconbtn"><svg class="ico"><use href="#i-plus"/></svg></button>
+        <button class="control"><svg class="ico ico-sm"><use href="#i-shield"/></svg> 工作区内修改 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
         <span class="spacer"></span>
-        <button class="control is-active">技能分类 <span class="badge">2</span> <span class="caret">⌄</span></button>
-        <button class="iconbtn">➤</button>
+        <button class="control is-active"><svg class="ico ico-sm"><use href="#i-tag"/></svg> 技能分类 <span class="badge">2</span> <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
+        <button class="iconbtn"><svg class="ico"><use href="#i-send"/></svg></button>
       </div>
     </div>
     <p class="hint">芯片紧邻「工作区内修改」的右侧；徽标显示当前输入框内已引用的技能数。</p>
@@ -302,12 +312,12 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
     <h2>② 形态 B · 一排分类芯片 —— 落在 composer 卡片上方整行（conversation.input.dock）</h2>
     <div class="dock">
       <span class="dock-label">技能</span>
-      <button class="pill"><span class="dot" style="background:var(--p-deepseek-500)"></span>开发工具</button>
-      <button class="pill"><span class="dot" style="background:var(--p-amber-500)"></span>内容创作</button>
-      <button class="pill"><span class="dot" style="background:var(--p-green-500)"></span>数据分析</button>
-      <button class="pill is-muted">＋ 固定分类</button>
+      <button class="pill">开发工具</button>
+      <button class="pill">内容创作</button>
+      <button class="pill">数据分析</button>
+      <button class="pill is-muted"><svg class="ico ico-sm"><use href="#i-plus"/></svg> 固定分类</button>
       <span class="spacer"></span>
-      <button class="pill is-muted">全部技能 ⌄</button>
+      <button class="pill is-muted">全部技能 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
     </div>
     <div class="composer">
       <div class="draft">
@@ -315,10 +325,10 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         <span class="placeholder">把这两份文档整理成一页摘要…</span>
       </div>
       <div class="toolrow">
-        <button class="iconbtn">＋</button>
-        <button class="control">工作区内修改 <span class="caret">⌄</span></button>
+        <button class="iconbtn"><svg class="ico"><use href="#i-plus"/></svg></button>
+        <button class="control"><svg class="ico ico-sm"><use href="#i-shield"/></svg> 工作区内修改 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
         <span class="spacer"></span>
-        <button class="iconbtn">➤</button>
+        <button class="iconbtn"><svg class="ico"><use href="#i-send"/></svg></button>
       </div>
     </div>
     <p class="hint">两种形态互斥，由设置 <code>entry.layout</code> 切换；形态 B 下点击分类 chip 直接打开面板并定位到该分类。</p>
@@ -328,7 +338,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   <section class="stage">
     <h2>③ 展开面板 —— 搜索 + 分类 tab + 勾选，底部「确认插入」统一写入</h2>
     <div class="popover">
-      <div class="search">🔍 搜索技能</div>
+      <div class="search"><svg class="ico ico-sm"><use href="#i-search"/></svg> 搜索技能</div>
       <div class="tabs">
         <button class="tab is-active">开发工具</button>
         <button class="tab">内容创作</button>
@@ -337,16 +347,14 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
       </div>
       <div class="list">
         <div class="item">
-          <div class="cbx is-on">✓</div>
-          <div class="glyph" style="background:var(--p-green-500)">C</div>
+          <div class="cbx is-on"><svg class="ico"><use href="#i-check"/></svg></div>
           <div class="body">
             <div class="name">cloudstudio-deploy <span class="tag">已在输入框</span></div>
             <div class="desc">Deploy static sites to CloudStudio sandbox</div>
           </div>
         </div>
         <div class="item">
-          <div class="cbx is-on">✓</div>
-          <div class="glyph" style="background:var(--p-deepseek-500)">T</div>
+          <div class="cbx is-on"><svg class="ico"><use href="#i-check"/></svg></div>
           <div class="body">
             <div class="name">tencent-docs</div>
             <div class="desc">腾讯文档个人版（docs.qq.com）在线云文档</div>
@@ -354,7 +362,6 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         </div>
         <div class="item">
           <div class="cbx"></div>
-          <div class="glyph" style="background:var(--p-bluish-400)">A</div>
           <div class="body">
             <div class="name">ardot-design-core</div>
             <div class="desc">Foundational workflow and hard rules shared…</div>
@@ -362,7 +369,6 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         </div>
         <div class="item is-gone">
           <div class="cbx"></div>
-          <div class="glyph" style="background:var(--p-bluish-200)">E</div>
           <div class="body">
             <div class="name">expert-manager</div>
             <div class="desc">专家包的全生命周期运营：转化（已失效）</div>
@@ -377,8 +383,8 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         </span>
       </div>
       <div class="popfoot">
-        <span class="link">＋ 新建分类</span>
-        <span class="link">管理分类与 dock →</span>
+        <span class="link"><svg class="ico ico-sm" style="display:inline-block;vertical-align:-2px"><use href="#i-plus"/></svg> 新建分类</span>
+        <span class="link">管理分类与 dock</span>
       </div>
     </div>
     <p class="hint">勾选不直接改动草稿；点「确认插入」才一次性写入对应 <code>/name</code> token。关闭面板＝丢弃未确认的勾选。</p>
@@ -396,26 +402,23 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 
         <div class="sub">分类</div>
         <div class="cat">
-          <span class="dot" style="width:10px;height:10px;background:var(--p-deepseek-500)"></span>
           <span class="nm">开发工具</span><span class="cnt">4 个技能</span>
           <span class="acts"><span>编辑</span><span>删除</span></span>
         </div>
         <div class="cat">
-          <span class="dot" style="width:10px;height:10px;background:var(--p-amber-500)"></span>
           <span class="nm">内容创作</span><span class="cnt">3 个技能</span>
           <span class="acts"><span>编辑</span><span>删除</span></span>
         </div>
         <div class="cat">
-          <span class="dot" style="width:10px;height:10px;background:var(--p-green-500)"></span>
           <span class="nm">数据分析</span><span class="cnt">2 个技能</span>
           <span class="acts"><span>编辑</span><span>删除</span></span>
         </div>
-        <div class="cat add">＋ 新建分类</div>
+        <div class="cat add"><svg class="ico ico-sm"><use href="#i-plus"/></svg> 新建分类</div>
 
         <div class="sub">固定在 dock 栏的分类（拖动排序）</div>
-        <label class="opt"><span class="grip">⠿</span><input type="checkbox" checked> 开发工具</label>
-        <label class="opt"><span class="grip">⠿</span><input type="checkbox" checked> 内容创作</label>
-        <label class="opt"><span class="grip">⠿</span><input type="checkbox"> 数据分析</label>
+        <label class="opt"><svg class="ico ico-sm grip"><use href="#i-grip"/></svg><input type="checkbox" checked> 开发工具</label>
+        <label class="opt"><svg class="ico ico-sm grip"><use href="#i-grip"/></svg><input type="checkbox" checked> 内容创作</label>
+        <label class="opt"><svg class="ico ico-sm grip"><use href="#i-grip"/></svg><input type="checkbox"> 数据分析</label>
       </div>
     </div>
   </section>
