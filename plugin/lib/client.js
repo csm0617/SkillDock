@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b35";
+		const BUILD = "b36";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -541,6 +541,27 @@ window.__ModuleLoader__.load({
 				marginBottom: "8px",
 			},
 			catHead: { display: "flex", alignItems: "center", gap: "8px" },
+			// The category name reads as a heading, not an input: 15px/600 primary,
+			// no box. It only becomes a field once clicked (see CategoryName).
+			catName: {
+				flex: "0 1 auto",
+				minWidth: 0,
+				padding: "0",
+				background: "transparent",
+				border: "none",
+				fontSize: "15px",
+				fontWeight: 600,
+				lineHeight: 1.4,
+				color: "var(--dsw-alias-label-primary)",
+				textAlign: "left",
+				cursor: "text",
+				outline: "none",
+				overflow: "hidden",
+				textOverflow: "ellipsis",
+				whiteSpace: "nowrap",
+			},
+			// Same footprint as the heading, so entering edit mode does not reflow.
+			catNameInput: { flex: "0 1 200px", height: "28px" },
 			// 34px tall, radius 8, bg-layer-3, border-l4 — At1oFq_input exactly.
 			input: {
 				height: "34px",
@@ -554,7 +575,6 @@ window.__ModuleLoader__.load({
 				cornerShape: "round",
 				outline: "none",
 			},
-			nameInput: { flex: "0 1 180px" },
 			aliasInput: { flex: "1 1 140px" },
 			catCount: { fontSize: "12px", lineHeight: 1.5, color: "var(--dsw-alias-label-tertiary)" },
 			linkBtn: {
@@ -888,6 +908,56 @@ window.__ModuleLoader__.load({
 		 * Settings card (settings.plugin.item, keyed by the namespace)         *
 		 * ------------------------------------------------------------------ */
 
+		/**
+		 * The category's name in its card header. It reads as a heading until the
+		 * user clicks it, then becomes an input — because a bare input box was
+		 * indistinguishable from the alias inputs on the skill rows below it, which
+		 * made it unclear which string was the category and which was an alias.
+		 * Enter or blur commits; Escape reverts.
+		 */
+		function CategoryName(props) {
+			const [editing, setEditing] = react.useState(false);
+			const [value, setValue] = react.useState(props.name);
+
+			// Keep in step when the stored name changes from elsewhere.
+			react.useEffect(() => setValue(props.name), [props.name]);
+
+			if (!editing) {
+				return h(
+					"button",
+					{
+						type: "button",
+						style: C.catName,
+						title: "点击重命名分类",
+						onClick: () => setEditing(true),
+					},
+					props.name,
+				);
+			}
+
+			const commit = () => {
+				const next = value.trim();
+				setEditing(false);
+				if (next && next !== props.name) props.onRename(next);
+			};
+
+			return h("input", {
+				style: Object.assign({}, C.input, C.catNameInput),
+				value: value,
+				autoFocus: true,
+				"aria-label": "分类名称",
+				onChange: (event) => setValue(event.target.value),
+				onBlur: commit,
+				onKeyDown: (event) => {
+					if (event.key === "Enter") commit();
+					if (event.key === "Escape") {
+						setValue(props.name);
+						setEditing(false);
+					}
+				},
+			});
+		}
+
 		function SettingsCard(props) {
 			const snapshot = props.useConfig ? props.useConfig((s) => s) : undefined;
 			const config = (snapshot && snapshot.value) || {};
@@ -1023,13 +1093,9 @@ window.__ModuleLoader__.load({
 						h(
 							"div",
 							{ style: C.catHead },
-							h("input", {
-								style: Object.assign({}, C.input, C.nameInput),
-								defaultValue: category.name,
-								onBlur: (event) => {
-									if (category.name !== event.target.value && event.target.value.trim())
-										renameCategory(category.id, event.target.value.trim());
-								},
+							h(CategoryName, {
+								name: category.name,
+								onRename: (next) => renameCategory(category.id, next),
 							}),
 							h("span", { style: C.catCount }, skills.length + " 个技能"),
 							h("button", { style: C.linkBtn, onClick: () => removeCategory(category.id) }, "删除分类"),
