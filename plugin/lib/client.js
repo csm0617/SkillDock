@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b42";
+		const BUILD = "b43";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -326,23 +326,34 @@ window.__ModuleLoader__.load({
 				background: "transparent",
 				color: "var(--dsw-alias-label-tertiary)",
 			},
+			// The picker is a floating popover, so it must read as a solid surface
+			// above the page. `--dsw-specific-menu` is the temptation here — it is
+			// what DSH's own menus use — but a skin may drive that token from its
+			// own "popup opacity" slider (dsh-dream-skin rewrites it to
+			// rgba(bg-base, alpha) and only frosts its OWN class names), which left
+			// this panel see-through with a sharp inner edge against the search
+			// field. An explicit opaque layer-3 stays readable under every theme.
 			panel: {
 				width: "100%",
 				maxWidth: "var(--dsh-composer-card-max-width)",
 				margin: "0 auto var(--dsh-composer-stack-gap)",
-				background: "var(--dsw-specific-menu, var(--dsw-alias-bg-base))",
+				background: "var(--dsw-alias-bg-layer-3)",
 				borderRadius: "12px",
 				cornerShape: "round",
 				boxShadow: "var(--dsw-elevation-panel)",
 				overflow: "hidden",
 			},
+			// A recessed well inside the opaque panel. Uses the interactive hover
+			// fill rather than `specific-tip`: that token is a near-opaque dark
+			// block under a skin, which made the top of the panel read as a solid
+			// slab separate from the list below it.
 			search: {
 				display: "flex",
 				alignItems: "center",
 				gap: "8px",
 				margin: "10px 12px",
 				padding: "7px 12px",
-				background: "var(--dsw-specific-tip)",
+				background: "var(--dsw-alias-interactive-bg-hover)",
 				borderRadius: "8px",
 				cornerShape: "round",
 				color: "var(--dsw-alias-label-caption)",
