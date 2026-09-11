@@ -106,7 +106,7 @@
 
 <!-- ① 折叠态：芯片在「工作区内修改」右侧 -->
 <div class="stage">
-  <h2>① 折叠态 —— 芯片位于工具行右侧（conversation.input.right）</h2>
+  <h2>① 形态 A —— 单个总芯片（设置 entry.layout = chip，落在 composer 卡片内工具行右侧）</h2>
 
   <div class="composer">
     <div class="draft"><span class="placeholder">给这个项目写一份 README…</span></div>
@@ -123,7 +123,7 @@
 
 <!-- ② dock 行 -->
 <div class="stage">
-  <h2>② dock 栏 —— 固定分类行（conversation.input.dock，composer 卡片上方）</h2>
+  <h2>② 形态 B —— 一排分类芯片（设置 entry.layout = row，落在 composer 卡片上方整行）</h2>
 
   <div class="dock">
     <span class="label">技能</span>
@@ -257,6 +257,18 @@
       </div>
       <div class="cat ghost" style="border-style:dashed;justify-content:center;color:#8a8d93">
         ＋ 新建分类
+      </div>
+
+      <div class="mini">入口形态（二选一）</div>
+      <div class="pinrow">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input type="radio" name="layout" checked> 单个总芯片 —— 放在 composer 卡片内（工具行右侧）
+        </label>
+      </div>
+      <div class="pinrow">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input type="radio" name="layout"> 一排分类芯片 —— 放在 composer 卡片上方整行
+        </label>
       </div>
 
       <div class="mini">固定在 dock 栏的分类（拖动排序）</div>

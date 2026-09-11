@@ -71,9 +71,11 @@ skill-dock/
 
 | 注册位置 | 组件 | 作用 |
 |---|---|---|
-| `conversation.input.right` | `CategoryChip` | 工具行右侧的紧凑入口：图标 + 当前激活分类名/已选技能数；点击开面板 |
-| `conversation.input.dock` | `DockRow` | 被固定（pinned）的分类行，每个分类一个 chip，点击直接展开该分类技能 |
-| `settings.plugin.item` | `SettingsCard` | 分类的增删改、技能归属拖拽、dock 固定项与排序 |
+| `conversation.input.right` | `CategoryChip` | **「单个总芯片」模式**下的唯一入口：位于 composer 卡片内的工具行右侧（紧邻「工作区内修改」）；图标 + 当前分类名/已选技能数，点击开面板 |
+| `conversation.input.dock` | `DockRow` | **「一排分类芯片」模式**下的入口：位于 composer 卡片上方的整行，每个固定分类一个 chip，点击直接展开该分类技能 |
+| `settings.plugin.item` | `SettingsCard` | 分类的增删改、技能归属、入口形态（总芯片/一排）、dock 固定项与排序 |
+
+两种入口形态**互斥**：由配置 `entry.layout` 决定，运行时只注册其中一种（切换设置即时生效，另一种的 slot 注册随 effect 回收）。
 
 全部通过 `ctx.slots.inject(key, () => ctx.slots.register({...}))` 注册；注册生命周期随 fiber，卸载自动回收。
 
@@ -91,13 +93,17 @@ interface Category {
 
 interface Config {
   categories: Category[]              // 分类定义与归属
+  entry: {
+    layout: 'chip' | 'row'            // 'chip'=单个总芯片（composer 卡片内工具行右侧）
+                                      // 'row' =一排分类芯片（composer 卡片上方整行）
+    showSelectedCount: boolean        // 总芯片是否显示已选技能数徽标
+  }
   dock: {
-    pinned: string[]                  // 固定在 dock 栏的分类 id，有序
-    showSelectedInChip: boolean       // 芯片是否显示已选技能数
+    pinned: string[]                  // 固定展示的分类 id，有序（'row' 模式决定显示顺序）
   }
   picker: {
     showUncategorized: boolean        // 面板是否显示“未分类”分组
-    searchPlaceholderLimit?: number   // 面板列表渲染上限（可调，不硬编码）
+    listLimit?: number                // 面板列表渲染上限（可调，不硬编码）
   }
 }
 ```
@@ -111,11 +117,21 @@ interface Config {
 
 ## 5. 交互规格
 
-### 5.1 入口芯片（`conversation.input.right`）
+### 5.1 入口形态（二选一，设置里切换）
 
-- 默认显示：分类图标 + 当前激活分类名（默认为第一个 pinned 分类；无分类时显示「分类」占位）。
-- 徽标显示当前草稿中已识别的 `/name` token 数量（读 `useInput` 的 `draft` + `occurrences`）。
-- 点击打开面板；再次点击或点击面板外/Esc 关闭（`dismissPopup` 语义）。
+**形态 A —— 单个总芯片（`entry.layout = 'chip'`，默认）**
+
+- 落点：composer 卡片内工具行右侧（`conversation.input.right`），紧邻「工作区内修改」。
+- 显示：分类图标 + 当前分类名（默认为第一个固定分类；无分类时显示「分类」占位）+ 已选数量徽标（受 `entry.showSelectedCount` 控制）。
+- 徽标数量来自当前草稿中已识别的 `/name` token。
+- 点击打开面板；再次点击、点击外部或 Esc 关闭。
+
+**形态 B —— 一排分类芯片（`entry.layout = 'row'`）**
+
+- 落点：composer 卡片上方整行（`conversation.input.dock`）。
+- 显示：`dock.pinned` 中的每个分类一个 chip（按配置顺序），末尾一个「全部技能」入口。
+- 点击某个分类 chip 直接打开面板并定位到该分类的 tab；点击「全部技能」打开面板且选中「全部」。
+- 未固定任何分类时，该行只显示「全部技能」入口，不占多余空间。
 
 ### 5.2 弹出面板（`SkillPicker`）
 
@@ -204,13 +220,14 @@ inputActions.setDraft / slash/input-insert-text
 | slot 注册属激活期失败即响 | 中 | 严格 type-only 导入别家 slot 声明，不导入运行时值（bundle-purity 门禁） |
 | `skills/list` 只含 user-invocable 技能 | 中 | 文档写明；`user-invocable: false` 的技能不出现，需要时另开 host 侧通道（非本期目标） |
 | 草稿写入与用户输入竞争 | 中 | 一律以 `draftRev` 做 CAS + 只增删自己插入的 token |
-| 面板遮挡输入框 | 低 | 使用 `conversation.input.overlay` 或 portal 定位；Phase 1 先用简单 popover |
+| 两个入口形态的落点写错（例如把形态 A 注册进 `conversation.input.dock`） | 中 | 落点由 `entry.layout` 单一映射决定，避免两处各自判断；激活期 slot 归属校验会拦住错误 key |
+| 面板遮挡输入框内容 | 低 | 优先向上弹出（dock 行在上方时）；必要时用 `conversation.input.overlay` 或 portal 定位 |
 
 ## 10. 分期
 
 - **Phase 0｜骨架冒烟**：包结构、`dsh.bundle` + `dsh.client`、空客户端组件上页、`--dump-config` 通过。
 - **Phase 1｜配置与归类**：Host settings namespace + Config schema + 设置卡片（能建分类、归类技能）。此阶段结束即可用，只是还没有 dock 入口。
-- **Phase 2｜dock 入口与选择**：`CategoryChip` + `DockRow` + `SkillPicker`，选中写入 `/name`；dock 固定项与排序生效。
+- **Phase 2｜入口与选择**：`CategoryChip`（形态 A）+ `DockRow`（形态 B）+ `SkillPicker`（两段式：勾选 → 确认插入）；`entry.layout` 切换即时生效（旧形态的 slot 注册随 effect 回收）。
 - **Phase 3｜可选增强**：分类拖拽排序、批量多选、host 侧 `skill_category` 工具让模型辅助归类。
 
 ## 11. 已锁定的决策
@@ -218,4 +235,6 @@ inputActions.setDraft / slash/input-insert-text
 1. **分类数据只存插件配置**（settings namespace `skill-dock`），不读不写 `SKILL.md`；不使用 frontmatter 作为种子或回退。
 2. 采用单包双半架构（方案 A）；不自建 Typert Remote。
 3. 技能调用复用内置 `/name` 通道，不新增模型可见输入、不新增 session 事件。
-4. 通过官方 slot 扩展点注入 UI，不修改 DSH 仓库源码、不 hack DOM。
+4. 入口形态二选一，由设置 `entry.layout` 决定：**单个总芯片**放 composer 卡片内工具行右侧（`conversation.input.right`）；**一排分类芯片**放 composer 卡片上方整行（`conversation.input.dock`）。
+5. 面板选择为**两段式**：勾选不直接改草稿，点「确认插入」统一写入 `/name` token；关闭面板丢弃未确认的勾选。
+6. 通过官方 slot 扩展点注入 UI，不修改 DSH 仓库源码、不 hack DOM。
