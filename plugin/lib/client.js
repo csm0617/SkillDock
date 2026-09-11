@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b26";
+		const BUILD = "b27";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -401,15 +401,18 @@ window.__ModuleLoader__.load({
 				fontSize: "12px",
 				color: "var(--dsw-alias-label-tertiary)",
 			},
+			// Footer buttons share one style: both cancel and confirm are plain
+			// bordered buttons, so neither shouts over the other. They stay separate
+			// keys because callers still name the intent, but the values are equal
+			// by design — keep them in step if either changes.
 			btnPrimary: {
 				height: "28px",
 				padding: "0 12px",
 				fontSize: "13px",
 				fontWeight: 500,
-				color: "var(--dsw-alias-label-inverted)",
-				// Same accent as the composer's primary send button.
-				background: "var(--dsw-alias-button-info-fill)",
-				border: "0.5px solid transparent",
+				color: "var(--dsw-alias-label-secondary)",
+				background: "transparent",
+				border: "0.5px solid var(--dsw-alias-border-l2)",
 				borderRadius: "8px",
 				cornerShape: "round",
 				cursor: "pointer",
@@ -419,6 +422,7 @@ window.__ModuleLoader__.load({
 				height: "28px",
 				padding: "0 12px",
 				fontSize: "13px",
+				fontWeight: 500,
 				color: "var(--dsw-alias-label-secondary)",
 				background: "transparent",
 				border: "0.5px solid var(--dsw-alias-border-l2)",
