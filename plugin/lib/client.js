@@ -37,7 +37,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b9";
+		const BUILD = "b10";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -247,10 +247,13 @@ window.__ModuleLoader__.load({
 				background: "var(--dsw-alias-state-business-tertiary)",
 				borderColor: "transparent",
 			},
-			// The "every skill" entry keeps a dashed outline: it is not a category.
+			// The "every skill" entry used to keep a dashed outline to mark it as
+			// "not a category". Dashed hairlines render heavier than the solid
+			// 0.5px border DSH uses everywhere else, which made that one chip look
+			// like it had a thick frame. It now shares the very same border as the
+			// category chips and is set apart only by text colour and fill.
 			pillMuted: {
 				background: "transparent",
-				border: "0.5px dashed var(--dsw-alias-border-l4)",
 				color: "var(--dsw-alias-label-tertiary)",
 			},
 			panel: {
