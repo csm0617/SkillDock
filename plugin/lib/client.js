@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b25";
+		const BUILD = "b26";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -294,11 +294,11 @@ window.__ModuleLoader__.load({
 			},
 			item: {
 				display: "flex",
-				// Centred on the whole row, so the checkbox and the alias both line up
-				// with the middle of the name+description block. Safe because the
-				// description is single-line (`nowrap`), so every row's body has the
-				// same height and "row centre" is a stable position.
-				alignItems: "center",
+				// Top-aligned so the checkbox lines up with the NAME LINE — the row
+				// that carries the alias — rather than with the vertical centre of
+				// the name+description block. Centring put the box ~10px below the
+				// alias, since the alias lives on the upper line.
+				alignItems: "flex-start",
 				gap: "10px",
 				padding: "8px",
 				minHeight: "56px",
@@ -315,6 +315,9 @@ window.__ModuleLoader__.load({
 				display: "flex",
 				alignItems: "center",
 				justifyContent: "center",
+				// The row pads 8px and the 20px name line centres at +10px, so the
+				// 15px box starts at +2.5px to sit centred on the alias.
+				marginTop: "2.5px",
 				border: "0.5px solid var(--dsw-alias-border-l4)",
 				borderRadius: "4px",
 				cornerShape: "round",
