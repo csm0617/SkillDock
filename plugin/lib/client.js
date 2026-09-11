@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b24";
+		const BUILD = "b25";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -176,13 +176,19 @@ window.__ModuleLoader__.load({
 		 * ------------------------------------------------------------------ */
 
 		/**
-		 * Width of the alias column. Fixed rather than content-sized so a row with
-		 * an alias and one without start their text at the same x.
+		 * Width of the alias column that leads every skill row. Fixed rather than
+		 * content-sized so the English name (and the indented description) sit at
+		 * the same x in every row.
 		 */
 		const ALIAS_COL = "96px";
 
-		/** Horizontal gap between the canonical skill name and the input marker. */
+		/** Horizontal gap between the alias column and the English name. */
 		const NAME_GAP = "6px";
+
+		/** Sum of two px lengths: "96px" + "6px" -> "102px". */
+		function addLen(a, b) {
+			return parseFloat(a) + parseFloat(b) + "px";
+		}
 
 		const S = {
 			dock: {
@@ -321,8 +327,9 @@ window.__ModuleLoader__.load({
 				borderColor: "transparent",
 			},
 			body: { minWidth: 0, flex: 1 },
-			// The canonical skill name, and the description indented to sit directly
-			// under it.
+			// The alias leads the row in a fixed-width column, so the English name
+			// begins at one constant x — and the description below is indented by
+			// exactly that column plus the row gap, landing under the English name.
 			name: {
 				display: "flex",
 				alignItems: "baseline",
@@ -333,6 +340,9 @@ window.__ModuleLoader__.load({
 			},
 			desc: {
 				marginTop: "2px",
+				// Indented past the alias column so the description starts directly
+				// under the English name it describes.
+				marginLeft: addLen(ALIAS_COL, NAME_GAP),
 				fontSize: "12px",
 				lineHeight: "18px",
 				color: "var(--dsw-alias-label-caption)",
@@ -351,13 +361,13 @@ window.__ModuleLoader__.load({
 				textOverflow: "ellipsis",
 				whiteSpace: "nowrap",
 			},
-			// The alias is its own column on the row: `order` puts it first (left of
-			// the checkbox+text group) while the DOM keeps it after S.body, and
-			// because it is a direct child of the centred row it sits on the same
-			// horizontal line as the checkbox. Fixed width keeps the text group at
-			// one constant x whether or not a row has an alias.
+			// The alias leads the row and carries the stronger text colour: people
+			// scan this list by the name they gave a skill, and the canonical
+			// English name below it is the supporting detail. The column is
+			// fixed-width (ALIAS_COL) rather than content-sized so the English name
+			// sits at the same x in every row, aliased or not; S.desc indents by
+			// ALIAS_COL + the row gap.
 			aliasLead: {
-				order: -1,
 				flex: "none",
 				width: ALIAS_COL,
 				fontSize: "13px",
@@ -367,7 +377,12 @@ window.__ModuleLoader__.load({
 				textOverflow: "ellipsis",
 				whiteSpace: "nowrap",
 			},
-			// The canonical skill name: one step quieter than the alias.
+			// Keeps the column occupied on rows whose skill has no alias, so those
+			// rows do not shift left relative to their aliased neighbours.
+			aliasSpacer: { flex: "none", width: ALIAS_COL },
+			// The canonical skill name: one step quieter than the alias. One colour
+			// on every row, aliased or not — the alias beside it never changes how
+			// strongly the name reads.
 			nameSecondary: {
 				fontSize: "13px",
 				fontWeight: 500,
@@ -714,15 +729,14 @@ window.__ModuleLoader__.load({
 										h(
 											"div",
 											{ style: S.name },
+											aliases[skill.name]
+												? h("span", { style: S.aliasLead }, aliases[skill.name])
+												: h("span", { style: S.aliasSpacer }),
 											h("span", { style: S.nameSecondary }, skill.name),
 											isInDraft ? h("span", { style: S.alias }, " 已在输入框") : null,
 										),
 										h("div", { style: S.desc }, skill.description || ""),
 									),
-									// The alias is a sibling of S.body, not a child of
-									// S.name: that puts it on the row's centre line (with
-									// the checkbox) instead of on the upper name line.
-									aliases[skill.name] ? h("span", { style: S.aliasLead }, aliases[skill.name]) : null,
 								);
 							});
 			}
