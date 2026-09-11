@@ -20,6 +20,38 @@ window.__ModuleLoader__.load({
 		const react = require("react");
 		const h = react.createElement;
 
+		/**
+		 * DSH's own icon set. It rides the shell's baseline modules (other client
+		 * packages require it the same way); the require is guarded so a
+		 * deployment without it degrades to an inline glyph instead of failing.
+		 */
+		let PRIMITIVES = null;
+		try {
+			PRIMITIVES = require("@deepseek-ai/dsh-client-ui-primitives");
+		} catch {
+			PRIMITIVES = null;
+		}
+
+		/** Search glyph: DSH's icon when available, otherwise a matching inline one. */
+		function SearchGlyph() {
+			if (PRIMITIVES && PRIMITIVES.IconSearchOutline16) return h(PRIMITIVES.IconSearchOutline16, { size: 14 });
+			return h(
+				"svg",
+				{
+					viewBox: "0 0 16 16",
+					width: 14,
+					height: 14,
+					fill: "none",
+					stroke: "currentColor",
+					strokeWidth: 1.5,
+					strokeLinecap: "round",
+					style: { flex: "none" },
+				},
+				h("circle", { cx: 7, cy: 7, r: 4.25 }),
+				h("path", { d: "m10.2 10.2 3.3 3.3" }),
+			);
+		}
+
 		/* ------------------------------------------------------------------ *
 		 * Temporary demo configuration (replaced by the settings namespace)   *
 		 * ------------------------------------------------------------------ */
@@ -623,11 +655,13 @@ window.__ModuleLoader__.load({
 					h(
 						"div",
 						{ style: S.search },
-						"搜索技能",
+						h(SearchGlyph, null),
+						query ? null : h("span", null, "搜索技能"),
 						h("input", {
 							style: S.searchInput,
 							value: query,
 							placeholder: "",
+							"aria-label": "搜索技能",
 							onChange: (event) => setQuery(event.target.value),
 							autoFocus: true,
 						}),
