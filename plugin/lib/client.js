@@ -3,8 +3,8 @@
  *
  * The dock strip above the composer plus the category picker panel:
  *   - the skill catalog comes from the `skills.list` Remote;
- *   - categories, aliases, dock pins and the entry layout are durable settings
- *     in the `skill-dock` namespace (the host half installs the section);
+ *   - categories, aliases and dock pins are durable settings in the `skill-dock`
+ *     namespace (the host half installs the section);
  *   - picks are written into the composer draft as literal `/skill-name` tokens,
  *     which is the deterministic invocation path the host already understands.
  */
@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b36";
+		const BUILD = "b39";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -736,8 +736,7 @@ window.__ModuleLoader__.load({
 
 			const openPanel = (categoryId) => {
 				setOpenCategory(categoryId);
-				setQuery("");
-				setChosen(new Set(tokensIn(draft, all)));
+				setQuery("");				setChosen(new Set(tokensIn(draft, all)));
 			};
 			const closePanel = () => setOpenCategory(undefined);
 
@@ -793,6 +792,8 @@ window.__ModuleLoader__.load({
 					),
 				);
 			}
+
+			/* ---------------- entry strip ---------------- */
 
 			const strip = h(
 				"div",
@@ -964,7 +965,6 @@ window.__ModuleLoader__.load({
 			const categories = config.categories || [];
 			const aliases = config.aliases || {};
 			const pinned = (config.dock && config.dock.pinned) || [];
-			const layout = (config.entry && config.entry.layout) || "row";
 			// Absent means shown: `false` is the only value that hides the entry,
 			// matching the host schema's `.default(true)`.
 			const showUncategorized = !(config.picker && config.picker.showUncategorized === false);
@@ -1173,7 +1173,8 @@ window.__ModuleLoader__.load({
 				BUILD;
 
 			// Fields separated by a hairline, mirroring the official card where
-			// consecutive fields carry `border-top: .5px solid border-l2`.
+			// consecutive fields carry `border-top: .5px solid border-l2`. The first
+			// field drops the divider, since the header above already provides one.
 			const field = (label, control, isFirst) =>
 				h(
 					"div",
@@ -1232,55 +1233,20 @@ window.__ModuleLoader__.load({
 							"div",
 							{ style: Object.assign({}, C.body, C.bodyOpen) },
 							field(
-								"入口形态",
+								"面板入口",
 								h(
-									"div",
-									null,
-							h(
-								"label",
-								{ style: C.opt },
-								h("input", {
-									type: "radio",
-									name: "skill-dock-layout",
-									checked: layout === "row",
-									onChange: () =>
-										write("entry", Object.assign({}, config.entry || {}, { layout: "row" })),
-								}),
-								"一排分类芯片",
-								h("span", { style: C.optNote }, "默认 · composer 卡片上方整行"),
-							),
-							h(
-								"label",
-								{ style: C.opt },
-								h("input", {
-									type: "radio",
-									name: "skill-dock-layout",
-									checked: layout === "chip",
-									onChange: () =>
-										write("entry", Object.assign({}, config.entry || {}, { layout: "chip" })),
-								}),
-								"单个总芯片",
-								h("span", { style: C.optNote }, "composer 卡片内 · 工具行右侧"),
-							),
-						),
-						true,
-					),
-
-					field(
-						"面板入口",
-						h(
-							"label",
-							{ style: C.opt },
-							h("input", {
-								type: "checkbox",
-								checked: showUncategorized,
-								onChange: (event) =>
-									write(
-										"picker",
-										Object.assign({}, config.picker || {}, {
-											showUncategorized: event.target.checked,
-										}),
-									),
+									"label",
+									{ style: C.opt },
+									h("input", {
+										type: "checkbox",
+										checked: showUncategorized,
+										onChange: (event) =>
+											write(
+												"picker",
+												Object.assign({}, config.picker || {}, {
+													showUncategorized: event.target.checked,
+												}),
+											),
 							}),
 							"展示「未分类」入口",
 							h("span", { style: C.optNote }, "关闭后 dock 栏不再提供未分类分类芯片"),
@@ -1305,49 +1271,27 @@ window.__ModuleLoader__.load({
 			installStyles();
 
 			// One settings scope per plugin: the durable home of categories,
-			// aliases, pins, and the entry layout.
+			// aliases, and dock pins.
 			const scope = ctx.settingsScope.bind({ namespace: "skill-dock" });
 
-			/** Registration currently mounted, so a layout change can swap it. */
-			let mounted = null;
-			let mountedKey = null;
-
-			const start = (key) => {
-				const dispose = ctx.slots.inject(key, () =>
-					ctx.slots.register(
-						{
-							name: key,
-							// `list` slots identify each entry by `id` (`key` is the keyed form).
-							id: "skill-dock-row",
-							inject: (sessionId) => ({
-								sessionId,
-								loadSkills: () => ctx.remote.skills.list({ sessionId }),
-								hooks: { config: scope },
-							}),
-						},
-						SkillDockRow,
-					),
-				);
-				mounted = dispose;
-				mountedKey = key;
-			};
-
-			const sync = () => {
-				const layout = (scope.getSnapshot().value || {}).entry?.layout || "row";
-				const key = layout === "chip" ? "conversation.input.right" : "conversation.input.dock";
-				if (key === mountedKey) return;
-				if (mounted) mounted();
-				start(key);
-			};
-
-			ctx.effect(() => {
-				sync();
-				const off = scope.subscribe(sync);
-				return () => {
-					off();
-					if (mounted) mounted();
-				};
-			}, "skill-dock: dock entry");
+			// The entry is the strip above the composer card. It registers once: the
+			// plugin no longer offers a second entry form, so there is nothing to
+			// swap at runtime.
+			ctx.slots.inject("conversation.input.dock", () =>
+				ctx.slots.register(
+					{
+						name: "conversation.input.dock",
+						// `list` slots identify each entry by `id`.
+						id: "skill-dock-row",
+						inject: (sessionId) => ({
+							sessionId,
+							loadSkills: () => ctx.remote.skills.list({ sessionId }),
+							hooks: { config: scope },
+						}),
+					},
+					SkillDockRow,
+				),
+			);
 
 			// The settings card is keyed by the namespace it edits, which is how
 			// the plugin-configuration tab pairs Host namespace and card.

@@ -2,9 +2,9 @@
  * SkillDock — Host half.
  *
  * Owns the `skill-dock` settings namespace: the durable home of skill
- * categories, aliases, dock pins, and the entry-layout choice. Everything the
- * browser half renders is derived from this one section; nothing here touches
- * skill loading or invocation semantics.
+ * categories, aliases, and dock pins. Everything the browser half renders is
+ * derived from this one section; nothing here touches skill loading or
+ * invocation semantics.
  */
 
 import Schema from '@deepseek-ai/schemastery'
@@ -30,11 +30,6 @@ export const Config = Schema.object({
   aliases: Schema.dict(Schema.string())
     .description('真名 -> 别名（仅展示与搜索，不参与调用）')
     .default({}),
-  entry: Schema.object({
-    layout: Schema.union([Schema.const('row'), Schema.const('chip')])
-      .description("'row'=一排分类芯片（卡片上方整行，默认）；'chip'=单个总芯片（卡片内工具行右侧）")
-      .default('row'),
-  }).default({}),
   dock: Schema.object({
     pinned: Schema.array(Schema.string())
       .description('固定在 dock 行展示的分类 id，有序')
