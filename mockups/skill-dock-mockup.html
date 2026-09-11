@@ -36,6 +36,8 @@
   --dsw-alias-interactive-bg-active:#2631481a;
   --dsw-alias-state-business-primary:var(--p-deepseek-500);
   --dsw-alias-state-business-tertiary:var(--p-deepseek-100);
+  --dsw-alias-brand-primary:var(--p-bluish-1000);
+  --dsw-alias-brand-primary-invert:var(--p-bluish-1000);
   --dsw-alias-state-success-primary:var(--p-green-500);
   --dsw-alias-state-warn-primary:var(--p-amber-500);
   --dsw-alias-state-error-primary:var(--p-red-600);
@@ -67,6 +69,8 @@
 }
 
 *{box-sizing:border-box}
+/* 原生控件也要黑白：压掉浏览器默认的蓝色强调 */
+input[type=checkbox],input[type=radio]{accent-color:var(--dsw-alias-brand-primary)}
 body{
   margin:0;padding:32px 24px;
   background:var(--dsw-alias-bg-base);
@@ -96,7 +100,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 .draft .placeholder{color:var(--dsw-alias-label-caption)}
 .token{
   display:inline-block;font:var(--font-xxs-strong-12);
-  background:var(--dsw-alias-state-business-tertiary);
+  background:var(--dsw-alias-interactive-bg-active);
   color:var(--dsw-alias-label-primary);
   border-radius:6px;corner-shape:round;padding:2px 7px;margin-right:4px;
 }
@@ -116,8 +120,9 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 .control:hover{background:var(--dsw-alias-interactive-bg-hover)}
 .control:active{background:var(--dsw-alias-interactive-bg-active)}
 .control.is-active{
-  background:var(--dsw-alias-state-business-tertiary);
+  background:var(--dsw-alias-interactive-bg-active);
   border-color:transparent;
+  font:var(--font-xs-strong-13);
 }
 .iconbtn{
   width:28px;height:28px;padding:0;
@@ -131,7 +136,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 .badge{
   min-width:16px;height:16px;padding:0 4px;
   display:inline-flex;align-items:center;justify-content:center;
-  background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-inverted);
+  background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-label-inverted);
   border-radius:999px;corner-shape:round;
   font:var(--font-xxs-strong-12);font-size:11px;line-height:1;
 }
@@ -158,7 +163,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   border-radius:999px;corner-shape:round;cursor:pointer;
 }
 .pill:hover{background:var(--dsw-alias-interactive-bg-hover)}
-.pill.is-active{background:var(--dsw-alias-state-business-tertiary);border-color:transparent}
+.pill.is-active{background:var(--dsw-alias-interactive-bg-active);border-color:transparent;font:var(--font-xs-strong-13)}
 .pill.is-muted{border-style:dashed;border-color:var(--dsw-alias-border-l4);color:var(--dsw-alias-label-tertiary);background:transparent}
 
 /* 单色线性图标：继承 currentColor，不做彩色图标 */
@@ -193,7 +198,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 }
 .tab:hover{background:var(--dsw-alias-interactive-bg-hover)}
 .tab.is-active{
-  background:var(--dsw-alias-state-business-tertiary);
+  background:var(--dsw-alias-interactive-bg-active);
   color:var(--dsw-alias-label-primary);font:var(--font-xxs-strong-12);
 }
 .list{max-height:258px;overflow:auto;padding:4px 6px}
@@ -209,7 +214,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   color:var(--dsw-alias-label-inverted);
 }
 .cbx .ico{width:10px;height:10px}
-.cbx.is-on{background:var(--dsw-alias-state-business-primary);border-color:transparent}
+.cbx.is-on{background:var(--dsw-alias-brand-primary);border-color:transparent}
 .item .body{min-width:0}
 .item .name{font:var(--font-xs-13);color:var(--dsw-alias-label-primary)}
 .item .desc{
@@ -235,11 +240,11 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   font:var(--font-xs-strong-13);
   border:.5px solid transparent;border-radius:8px;corner-shape:round;cursor:pointer;
 }
-.btn.primary{background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-inverted)}
+.btn.primary{background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-label-inverted)}
 .btn.ghost{background:transparent;color:var(--dsw-alias-label-secondary);border-color:var(--dsw-alias-border-l2)}
 .btn.ghost:hover{background:var(--dsw-alias-interactive-bg-hover)}
 .link{color:var(--dsw-alias-label-tertiary);cursor:pointer}
-.link:hover{color:var(--dsw-alias-state-business-primary)}
+.link:hover{color:var(--dsw-alias-label-primary)}
 
 /* ── 设置卡片（官方：发丝线边框 + tip 头部）── */
 .card{
@@ -263,7 +268,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 .cat .cnt{font:var(--font-xxs-12);color:var(--dsw-alias-label-caption)}
 .cat .acts{margin-left:auto;display:flex;gap:12px;font:var(--font-xxs-12);color:var(--dsw-alias-label-tertiary)}
 .cat .acts span{cursor:pointer}
-.cat .acts span:hover{color:var(--dsw-alias-state-business-primary)}
+.cat .acts span:hover{color:var(--dsw-alias-label-primary)}
 .cat.add{
   display:flex;align-items:center;justify-content:center;gap:6px;
   border-style:dashed;border-color:var(--dsw-alias-border-l4);
