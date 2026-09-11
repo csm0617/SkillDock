@@ -1,7 +1,7 @@
 /**
  * SkillDock — Host half.
  *
- * Owns the `skill-dock` settings namespace: the durable home of skill
+ * Owns the `changhai-skill-dock` settings namespace: the durable home of skill
  * categories, aliases, and dock pins. Everything the browser half renders is
  * derived from this one section; nothing here touches skill loading or
  * invocation semantics.
@@ -9,7 +9,7 @@
 
 import Schema from '@deepseek-ai/schemastery'
 
-export const name = 'skill-dock'
+export const name = 'changhai-skill-dock'
 
 /** The settings service is optional: without it the plugin still loads, inert. */
 export const inject = []
@@ -46,7 +46,7 @@ export const Config = Schema.object({
 })
 
 /** The settings namespace this plugin owns. */
-export const NAMESPACE = 'skill-dock'
+export const NAMESPACE = 'changhai-skill-dock'
 
 export function apply(ctx, config) {
   // The authoritative value: the composed entry until a settings scope attaches,

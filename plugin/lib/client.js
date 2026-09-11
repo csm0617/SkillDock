@@ -3,13 +3,13 @@
  *
  * The dock strip above the composer plus the category picker panel:
  *   - the skill catalog comes from the `skills.list` Remote;
- *   - categories, aliases and dock pins are durable settings in the `skill-dock`
+ *   - categories, aliases and dock pins are durable settings in the `changhai-skill-dock`
  *     namespace (the host half installs the section);
  *   - picks are written into the composer draft as literal `/skill-name` tokens,
  *     which is the deterministic invocation path the host already understands.
  */
 window.__ModuleLoader__.load({
-	id: "dsh-plugin-skill-dock",
+	id: "dsh-plugin-changhai-skill-dock",
 	factory: (require) => {
 		var module = { exports: {} };
 		var exports = module.exports;
@@ -38,7 +38,7 @@ window.__ModuleLoader__.load({
 		const BUILD = "b43";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
-		const CSS_ID = "dsh-plugin-skill-dock/search.css";
+		const CSS_ID = "dsh-plugin-changhai-skill-dock/search.css";
 
 		/**
 		 * Inline styles cannot reach a native `::placeholder`, and the native
@@ -49,7 +49,7 @@ window.__ModuleLoader__.load({
 			if (typeof document === "undefined") return;
 			const existing = document.querySelector('style[data-plugin-css="' + CSS_ID + '"]');
 			const tag = existing || document.createElement("style");
-			tag.dataset.plugin = "dsh-plugin-skill-dock";
+			tag.dataset.plugin = "dsh-plugin-changhai-skill-dock";
 			tag.dataset.pluginCss = CSS_ID;
 			// Text is always (re)assigned, so a hot-reloaded bundle updates the
 			// rules instead of keeping the first version's stylesheet.
@@ -833,7 +833,7 @@ window.__ModuleLoader__.load({
 				CATALOG.names = all;
 			}, [all]);
 
-			// Durable configuration (settings namespace `skill-dock`).
+			// Durable configuration (settings namespace `changhai-skill-dock`).
 			const snapshot = props.useConfig ? props.useConfig((s) => s) : undefined;
 			const config = (snapshot && snapshot.value) || {};
 			const categories = config.categories || [];
@@ -1413,7 +1413,7 @@ window.__ModuleLoader__.load({
 
 			// One settings scope per plugin: the durable home of categories,
 			// aliases, and dock pins.
-			const scope = ctx.settingsScope.bind({ namespace: "skill-dock" });
+			const scope = ctx.settingsScope.bind({ namespace: "changhai-skill-dock" });
 
 			// The entry is the strip above the composer card. It registers once: the
 			// plugin no longer offers a second entry form, so there is nothing to
@@ -1440,7 +1440,7 @@ window.__ModuleLoader__.load({
 				ctx.slots.register(
 					{
 						name: "settings.plugin.item",
-						key: "skill-dock",
+						key: "changhai-skill-dock",
 						inject: () => ({ scope, hooks: { config: scope } }),
 					},
 					SettingsCard,

@@ -1,7 +1,7 @@
 # SkillDock bundle layer.
 #
 # Unlike smoke.yml (a --patch overlay that points at a relative source path),
-# this layer is applied when a profile lists `dsh-plugin-skill-dock` in
+# this layer is applied when a profile lists `dsh-plugin-changhai-skill-dock` in
 # `dsh.profile.bundles`, so the row references the package BY NAME and Node
 # resolution finds the installed code.
 #
@@ -10,5 +10,5 @@
 # `./client` export into the __DSH_BOOT__ graph.
 - insert:
     - id: skill-dock
-      name: dsh-plugin-skill-dock
+      name: dsh-plugin-changhai-skill-dock
       config: {}
