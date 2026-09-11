@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b20";
+		const BUILD = "b21";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -148,11 +148,19 @@ window.__ModuleLoader__.load({
 			return out.replace(/\s+/g, " ").trim();
 		}
 
-		/** Compose the final draft: the user's prose, then the chosen tokens. */
+		/**
+		 * Compose the final draft: the user's prose, then the chosen tokens.
+		 *
+		 * A trailing space is deliberate. DSH resolves `/name` from the text
+		 * immediately before the caret, so a final token with nothing after it is
+		 * still "open" and the composer offers that skill's description while the
+		 * user types. Ending on a space closes the token.
+		 */
 		function composeDraft(draft, chosen, known) {
 			const prose = stripTokens(draft, known);
 			const tokens = chosen.map((n) => "/" + n);
-			return [prose, ...tokens].filter(Boolean).join(" ");
+			const text = [prose, ...tokens].filter(Boolean).join(" ");
+			return text ? text + " " : text;
 		}
 
 		/** Category id of a skill, or undefined when it belongs to none. */
