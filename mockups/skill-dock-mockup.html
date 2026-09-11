@@ -155,7 +155,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 
 /* ── popover 面板（官方：border:0 + elevation-panel）── */
 .popover{
-  width:380px;
+  width:400px;
   background:var(--dsw-specific-menu);
   border:0;border-radius:12px;corner-shape:round;
   box-shadow:var(--dsw-elevation-panel);
@@ -201,8 +201,15 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
 .item .name{font:var(--font-xs-13);color:var(--dsw-alias-label-primary)}
 .item .desc{
   margin-top:2px;font:var(--font-xxs-12);color:var(--dsw-alias-label-caption);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;
 }
+/* 别名：行右侧展示，次要色，不参与真实调用 */
+.item .alias{
+  margin-left:auto;padding-left:10px;flex:none;align-self:center;
+  font:var(--font-xxs-12);color:var(--dsw-alias-label-tertiary);
+  max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.item.is-gone .alias{opacity:.6}
 .item.is-gone .name,.item.is-gone .desc{color:var(--dsw-alias-label-caption);opacity:.6}
 .tag{
   margin-left:6px;padding:0 5px;
@@ -257,6 +264,18 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   color:var(--dsw-alias-label-tertiary);font:var(--font-xxs-12);cursor:pointer;
 }
 .sub{margin:16px 0 8px;font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption)}
+/* 别名编辑行 */
+.aliasrow{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 10px;margin-bottom:6px;
+  border:.5px solid var(--dsw-alias-border-l1);border-radius:9px;corner-shape:round;
+  font:var(--font-xs-13);
+}
+.aliasrow .real{color:var(--dsw-alias-label-primary);font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+.aliasrow .arrow{color:var(--dsw-alias-label-caption)}
+.aliasrow .aliasval{color:var(--dsw-alias-label-secondary)}
+.aliasrow .acts2{margin-left:auto;font:var(--font-xxs-12);color:var(--dsw-alias-label-tertiary);cursor:pointer}
+.aliasrow .acts2:hover{color:var(--dsw-alias-label-primary)}
 .opt{display:flex;align-items:center;gap:8px;padding:5px 0;font:var(--font-xs-13)}
 .opt .where{font:var(--font-xxs-12);color:var(--dsw-alias-label-caption)}
 .grip{color:var(--dsw-alias-label-caption);cursor:grab}
@@ -325,7 +344,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   <section class="stage">
     <h2>③ 展开面板 —— 搜索 + 分类 tab + 勾选，底部「确认插入」统一写入</h2>
     <div class="popover">
-      <div class="search"><svg class="ico ico-sm"><use href="#i-search"/></svg> 搜索技能</div>
+      <div class="search"><svg class="ico ico-sm"><use href="#i-search"/></svg> 搜索技能或别名</div>
       <div class="tabs">
         <button class="tab is-active">开发工具</button>
         <button class="tab">内容创作</button>
@@ -339,6 +358,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
             <div class="name">cloudstudio-deploy <span class="tag">已在输入框</span></div>
             <div class="desc">Deploy static sites to CloudStudio sandbox</div>
           </div>
+          <span class="alias">云端部署</span>
         </div>
         <div class="item">
           <div class="cbx is-on"><svg class="ico"><use href="#i-check"/></svg></div>
@@ -346,6 +366,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
             <div class="name">tencent-docs</div>
             <div class="desc">腾讯文档个人版（docs.qq.com）在线云文档</div>
           </div>
+          <span class="alias">腾讯文档</span>
         </div>
         <div class="item">
           <div class="cbx"></div>
@@ -353,6 +374,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
             <div class="name">ardot-design-core</div>
             <div class="desc">Foundational workflow and hard rules shared…</div>
           </div>
+          <span class="alias">设计规范</span>
         </div>
         <div class="item is-gone">
           <div class="cbx"></div>
@@ -360,6 +382,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
             <div class="name">expert-manager</div>
             <div class="desc">专家包的全生命周期运营：转化（已失效）</div>
           </div>
+          <span class="alias">专家管理</span>
         </div>
       </div>
       <div class="popfoot">
@@ -374,7 +397,7 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         <span class="link">管理分类与 dock</span>
       </div>
     </div>
-    <p class="hint">勾选不直接改动草稿；点「确认插入」才一次性写入对应 <code>/name</code> token。关闭面板＝丢弃未确认的勾选。</p>
+    <p class="hint">技能名右侧是别名（次要色）。搜索框同时匹配技能名与别名。勾选不直接改动草稿；点「确认插入」才一次性写入对应 <code>/真名</code> token —— 别名只用于展示与搜索，插进输入框的始终是真实技能名。关闭面板＝丢弃未确认的勾选。</p>
   </section>
 
   <!-- ④ 设置 -->
@@ -406,6 +429,11 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         <label class="opt"><svg class="ico ico-sm grip"><use href="#i-grip"/></svg><input type="checkbox" checked> 开发工具</label>
         <label class="opt"><svg class="ico ico-sm grip"><use href="#i-grip"/></svg><input type="checkbox" checked> 内容创作</label>
         <label class="opt"><svg class="ico ico-sm grip"><use href="#i-grip"/></svg><input type="checkbox"> 数据分析</label>
+
+        <div class="sub">技能别名（仅展示与搜索，不影响真实调用）</div>
+        <div class="aliasrow"><span class="real">cloudstudio-deploy</span><span class="arrow">→</span><span class="aliasval">云端部署</span><span class="acts2">编辑</span></div>
+        <div class="aliasrow"><span class="real">tencent-docs</span><span class="arrow">→</span><span class="aliasval">腾讯文档</span><span class="acts2">编辑</span></div>
+        <div class="aliasrow"><span class="real">ardot-design-core</span><span class="arrow">→</span><span class="aliasval">设计规范</span><span class="acts2">编辑</span></div>
       </div>
     </div>
   </section>
