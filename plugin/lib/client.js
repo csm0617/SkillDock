@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b31";
+		const BUILD = "b33";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -584,9 +584,13 @@ window.__ModuleLoader__.load({
 			},
 			empty: { fontSize: "12px", lineHeight: 1.5, color: "var(--dsw-alias-label-tertiary)", padding: "2px 0" },
 			adder: { display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" },
-			// Holds the skill-name column open in the adder, so 加入分类 starts at the
-			// same x as the alias inputs above it.
-			adderSpacer: { flex: "none", width: SKILL_COL },
+			// The adder mirrors a skill row: the select occupies the skill-name
+			// column's slot (starting at the card's left edge, level with the
+			// category-name input) and the button takes the alias input's slot (so it
+			// lands under the alias inputs). Widths do the aligning — a marginLeft
+			// would drift with the select's rendered width.
+			adderSelect: { flex: "none", width: SKILL_COL },
+			addBtnIndent: { flex: "none" },
 			select: {
 				height: "34px",
 				fontSize: "13px",
@@ -1031,17 +1035,16 @@ window.__ModuleLoader__.load({
 						h(
 							"div",
 							{ style: C.adder },
-							h("span", { style: C.adderSpacer }),
 							h(
 								"select",
-								{ id: selectId, style: C.select, defaultValue: "" },
+								{ id: selectId, style: Object.assign({}, C.select, C.adderSelect), defaultValue: "" },
 								h("option", { value: "" }, "选择技能…"),
 								candidates.map((name) => h("option", { key: name, value: name }, name)),
 							),
 							h(
 								"button",
 								{
-									style: C.addBtn,
+									style: Object.assign({}, C.addBtn, C.addBtnIndent),
 									onClick: () => {
 										const el = document.getElementById(selectId);
 										if (el && el.value) assignSkill(category.id, el.value);
