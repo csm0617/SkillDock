@@ -1,14 +1,12 @@
 /**
  * SkillDock — browser half (hand-written lazy-CJS factory artifact).
  *
- * Phase 2 (visible slice): the dock row above the composer plus the picker
- * panel. Real in this iteration:
+ * The dock strip above the composer plus the category picker panel:
  *   - the skill catalog comes from the `skills.list` Remote;
+ *   - categories, aliases, dock pins and the entry layout are durable settings
+ *     in the `skill-dock` namespace (the host half installs the section);
  *   - picks are written into the composer draft as literal `/skill-name` tokens,
  *     which is the deterministic invocation path the host already understands.
- * Temporary in this iteration:
- *   - categories and aliases are a demo constant; Phase 1 moves them into the
- *     plugin's settings namespace.
  */
 window.__ModuleLoader__.load({
 	id: "dsh-plugin-skill-dock",
@@ -37,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b11";
+		const BUILD = "b12";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -55,18 +53,16 @@ window.__ModuleLoader__.load({
 			tag.dataset.pluginCss = CSS_ID;
 			// Text is always (re)assigned, so a hot-reloaded bundle updates the
 			// rules instead of keeping the first version's stylesheet.
+			// Chips draw no focus ring at all: clicking one also reaches
+			// `:focus-visible` in some browsers, which painted a frame around the
+			// freshly selected category. Keyboard users get a background tint
+			// instead. Scoped to `.skill-dock-pill`, so buttons elsewhere in the
+			// plugin (the settings card) keep their normal focus behaviour.
 			tag.textContent =
 				".skill-dock-search-input::placeholder{color:var(--dsw-alias-label-caption);opacity:1}" +
 				".skill-dock-pill:hover{background:var(--dsw-alias-interactive-bg-hover)}" +
-				// Official treatment: suppress the browser's default focus ring and
-				// draw our own only for keyboard focus (`:focus-visible`), so a
-				// mouse click on a chip no longer leaves a heavy outline.
-				".skill-dock-root button:focus{outline:none}" +
-				// No ring on chips at all: a clicked chip is also `:focus-visible`
-				// in some browsers, which drew an unwanted frame around the
-				// selected category. Keyboard focus is signalled with a background
-				// tint instead of an outline.
-				".skill-dock-root button:focus-visible{outline:none !important;background:var(--dsw-alias-interactive-bg-hover)}";
+				".skill-dock-pill:focus{outline:none}" +
+				".skill-dock-pill:focus-visible{outline:none;background:var(--dsw-alias-interactive-bg-hover)}";
 			if (!existing) document.head.appendChild(tag);
 		}
 
@@ -91,25 +87,6 @@ window.__ModuleLoader__.load({
 		}
 
 		/* ------------------------------------------------------------------ *
-		 * Temporary demo configuration (replaced by the settings namespace)   *
-		 * ------------------------------------------------------------------ */
-
-		/** Demo aliases: real name -> display alias. */
-		const DEMO_ALIASES = {
-			"tencent-docs": "腾讯文档",
-			"cloudstudio-deploy": "云端部署",
-			"ardot-design-core": "设计规范",
-			"expert-manager": "专家管理",
-		};
-
-		/** Demo category rules: first matching rule wins, else the skill is uncategorized. */
-		const DEMO_CATEGORY_RULES = [
-			{ id: "deploy", name: "部署运维", test: (n) => /deploy|cloud|studio|worktree/.test(n) },
-			{ id: "docs", name: "文档写作", test: (n) => /doc|write|writing|readme/.test(n) },
-			{ id: "design", name: "设计规范", test: (n) => /design|brand|ui|theme/.test(n) },
-		];
-
-		/* ------------------------------------------------------------------ *
 		 * Helpers                                                             *
 		 * ------------------------------------------------------------------ */
 
@@ -127,7 +104,7 @@ window.__ModuleLoader__.load({
 		 * Last catalog the dock row loaded, shared inside this bundle so the
 		 * settings card can offer the same skill names without a second request.
 		 */
-		const CATALOG = { sessionId: undefined, names: [] };
+		const CATALOG = { names: [] };
 
 		/**
 		 * Match quality of one skill for a lowercased query, or -1 for no match.
@@ -178,18 +155,10 @@ window.__ModuleLoader__.load({
 			return [prose, ...tokens].filter(Boolean).join(" ");
 		}
 
-		/**
-		 * Category id of a skill.
-		 * Real configuration wins; the demo rules apply only while the user has
-		 * not defined any category yet (removed once the settings card ships).
-		 */
-		function resolveCategory(name, categories, useDemo) {
+		/** Category id of a skill, or undefined when it belongs to none. */
+		function resolveCategory(name, categories) {
 			for (const category of categories) {
 				if (category.skills && category.skills.indexOf(name) >= 0) return category.id;
-			}
-			if (!useDemo) return undefined;
-			for (const rule of DEMO_CATEGORY_RULES) {
-				if (rule.test(name)) return rule.id;
 			}
 			return undefined;
 		}
@@ -221,9 +190,10 @@ window.__ModuleLoader__.load({
 				color: "var(--dsw-alias-label-secondary)",
 			},
 			spacer: { flex: 1 },
-			// Unselected chips keep the thin hairline look; the SELECTED chip drops
-			// its border entirely (the active fill is the only signal), which is
-			// what "don't draw a frame once it is selected" asks for.
+			// Every chip in the strip wears the same 0.5px solid hairline, selected
+			// or not; selection is signalled by the fill alone. An earlier build
+			// dropped the border once selected, which read as "the frame changed
+			// when I clicked" — do not reintroduce that.
 			pill: {
 				display: "inline-flex",
 				alignItems: "center",
@@ -555,19 +525,14 @@ window.__ModuleLoader__.load({
 
 			// Publish the catalog for the settings card (same module, no second request).
 			react.useEffect(() => {
-				CATALOG.sessionId = props.sessionId;
 				CATALOG.names = all;
-			}, [all, props.sessionId]);
+			}, [all]);
 
 			// Durable configuration (settings namespace `skill-dock`).
 			const snapshot = props.useConfig ? props.useConfig((s) => s) : undefined;
 			const config = (snapshot && snapshot.value) || {};
-			const configuredCategories = config.categories || [];
-			const useDemo = configuredCategories.length === 0;
-			const categories = useDemo
-				? DEMO_CATEGORY_RULES.map((rule) => ({ id: rule.id, name: rule.name }))
-				: configuredCategories;
-			const aliases = Object.keys(config.aliases || {}).length ? config.aliases : useDemo ? DEMO_ALIASES : {};
+			const categories = config.categories || [];
+			const aliases = config.aliases || {};
 			const pinnedIds = (config.dock && config.dock.pinned) || [];
 			const pinned = pinnedIds.length
 				? pinnedIds
@@ -660,9 +625,9 @@ window.__ModuleLoader__.load({
 			} else {
 				const q = query.trim().toLowerCase();
 				const inScope = skills.filter((skill) => {
-					if (openCategory === NONE) return resolveCategory(skill.name, configuredCategories, useDemo) === undefined;
+					if (openCategory === NONE) return resolveCategory(skill.name, categories) === undefined;
 					if (openCategory === ALL) return true;
-					return resolveCategory(skill.name, configuredCategories, useDemo) === openCategory;
+					return resolveCategory(skill.name, categories) === openCategory;
 				});
 				// Ranked, not just filtered: name hits lead, alias next, and the
 				// description only contributes for queries of two characters or more.
