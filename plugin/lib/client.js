@@ -59,6 +59,24 @@ window.__ModuleLoader__.load({
 		 */
 		const CATALOG = { sessionId: undefined, names: [] };
 
+		/**
+		 * Match quality of one skill for a lowercased query, or -1 for no match.
+		 * Ranking matters: a bare substring test over descriptions matched nearly
+		 * every skill for a single letter, so name and alias lead and the
+		 * description is a last-resort tier that needs at least two characters.
+		 */
+		function matchScore(skill, query, aliases) {
+			const name = skill.name.toLowerCase();
+			const alias = (aliases[skill.name] || "").toLowerCase();
+			if (name.startsWith(query)) return 0;
+			if (name.split("-").some((segment) => segment.startsWith(query))) return 1;
+			if (alias.startsWith(query)) return 2;
+			if (name.includes(query)) return 3;
+			if (alias.includes(query)) return 4;
+			if (query.length >= 2 && (skill.description || "").toLowerCase().includes(query)) return 5;
+			return -1;
+		}
+
 		/** Escape a skill name for use inside a RegExp. */
 		function escapeRe(value) {
 			return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -552,22 +570,21 @@ window.__ModuleLoader__.load({
 				rows = h("div", { style: S.notice }, "正在加载技能…");
 			} else {
 				const q = query.trim().toLowerCase();
-				const filtered = skills
-					.filter((skill) => {
-						if (openCategory === NONE) {
-							if (resolveCategory(skill.name, configuredCategories, useDemo) !== undefined) return false;
-						} else if (openCategory !== ALL) {
-							if (resolveCategory(skill.name, configuredCategories, useDemo) !== openCategory) return false;
-						}
-						if (!q) return true;
-						const alias = aliases[skill.name] || "";
-						return (
-							skill.name.toLowerCase().includes(q) ||
-							(skill.description || "").toLowerCase().includes(q) ||
-							alias.toLowerCase().includes(q)
-						);
-					})
-					.slice(0, limited);
+				const inScope = skills.filter((skill) => {
+					if (openCategory === NONE) return resolveCategory(skill.name, configuredCategories, useDemo) === undefined;
+					if (openCategory === ALL) return true;
+					return resolveCategory(skill.name, configuredCategories, useDemo) === openCategory;
+				});
+				// Ranked, not just filtered: name hits lead, alias next, and the
+				// description only contributes for queries of two characters or more.
+				const scored = q
+					? inScope
+							.map((skill) => ({ skill, score: matchScore(skill, q, aliases) }))
+							.filter((entry) => entry.score >= 0)
+							.sort((a, b) => a.score - b.score || a.skill.name.localeCompare(b.skill.name))
+							.map((entry) => entry.skill)
+					: inScope;
+				const filtered = scored.slice(0, limited);
 				rows =
 					filtered.length === 0
 						? h("div", { style: S.notice }, "没有匹配的技能")
