@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b41";
+		const BUILD = "b42";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -262,10 +262,19 @@ window.__ModuleLoader__.load({
 				height: "36px",
 				padding: "4px 14px",
 				boxSizing: "border-box",
-				background: "var(--dsw-specific-tip)",
-				border: "0.5px solid var(--dsw-alias-border-l1)",
+				// Same surface as the composer card below it. `specific-input-major`
+				// is the token the official card uses; `specific-tip` looked similar
+				// under the default theme but is a nearly opaque dark fill under a
+				// skin (0.9 alpha vs this one's 0.08), which made the strip read as a
+				// solid slab against a wallpaper.
+				background: "var(--dsw-specific-input-major)",
+				// The official card draws its edge via the elevation stroke color
+				// rather than a literal border.
+				"--dsw-elevation-stroke-color": "var(--dsw-alias-border-l2)",
+				border: 0,
 				borderRadius: "12px",
 				cornerShape: "round",
+				boxShadow: "var(--dsw-elevation-soft)",
 			},
 			// The label is now an icon + word, so it needs to lay out on one line.
 			dockLabel: {
