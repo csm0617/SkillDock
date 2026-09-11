@@ -149,8 +149,11 @@ window.__ModuleLoader__.load({
 				display: "flex",
 				alignItems: "center",
 				gap: "8px",
-				padding: "11px 14px",
-				borderBottom: "0.5px solid var(--dsw-alias-border-l1)",
+				margin: "10px 12px",
+				padding: "7px 12px",
+				background: "var(--dsw-specific-tip)",
+				borderRadius: "8px",
+				cornerShape: "round",
 				color: "var(--dsw-alias-label-caption)",
 				fontSize: "13px",
 			},
@@ -162,32 +165,6 @@ window.__ModuleLoader__.load({
 				color: "var(--dsw-alias-label-primary)",
 				fontSize: "13px",
 				lineHeight: "20px",
-			},
-			tabs: {
-				display: "flex",
-				gap: "6px",
-				padding: "10px 12px",
-				borderBottom: "0.5px solid var(--dsw-alias-border-l1)",
-				overflowX: "auto",
-			},
-			tab: {
-				height: "26px",
-				padding: "0 11px",
-				display: "inline-flex",
-				alignItems: "center",
-				fontSize: "12px",
-				color: "var(--dsw-alias-label-secondary)",
-				background: "var(--dsw-specific-tip)",
-				border: "0.5px solid transparent",
-				borderRadius: "999px",
-				cornerShape: "round",
-				cursor: "pointer",
-				whiteSpace: "nowrap",
-			},
-			tabActive: {
-				background: "var(--dsw-alias-state-business-tertiary)",
-				color: "var(--dsw-alias-label-primary)",
-				fontWeight: 500,
 			},
 			list: { maxHeight: "258px", overflowY: "auto", padding: "4px 6px" },
 			item: {
@@ -213,7 +190,8 @@ window.__ModuleLoader__.load({
 				color: "var(--dsw-alias-label-inverted)",
 			},
 			cbxOn: {
-				background: "var(--dsw-alias-state-business-primary)",
+				// Same accent as the composer's primary send button.
+				background: "var(--dsw-alias-button-info-fill)",
 				borderColor: "transparent",
 			},
 			body: { minWidth: 0, flex: 1 },
@@ -253,7 +231,8 @@ window.__ModuleLoader__.load({
 				fontSize: "13px",
 				fontWeight: 500,
 				color: "var(--dsw-alias-label-inverted)",
-				background: "var(--dsw-alias-state-business-primary)",
+				// Same accent as the composer's primary send button.
+				background: "var(--dsw-alias-button-info-fill)",
 				border: "0.5px solid transparent",
 				borderRadius: "8px",
 				cornerShape: "round",
@@ -436,29 +415,6 @@ window.__ModuleLoader__.load({
 							onChange: (event) => setQuery(event.target.value),
 							autoFocus: true,
 						}),
-					),
-					h(
-						"div",
-						{ style: S.tabs },
-						DEMO_CATEGORY_RULES.map((rule) =>
-							h(
-								"button",
-								{
-									key: rule.id,
-									style: Object.assign({}, S.tab, openCategory === rule.id ? S.tabActive : null),
-									onClick: () => setOpenCategory(rule.id),
-								},
-								rule.name,
-							),
-						),
-						h(
-							"button",
-							{
-								style: Object.assign({}, S.tab, openCategory === null ? S.tabActive : null),
-								onClick: () => setOpenCategory(null),
-							},
-							"全部",
-						),
 					),
 					h("div", { style: S.list }, rows),
 					h(
