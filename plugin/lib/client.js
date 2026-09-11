@@ -43,6 +43,9 @@ window.__ModuleLoader__.load({
 		 * Helpers                                                             *
 		 * ------------------------------------------------------------------ */
 
+		/** Sentinel category selection meaning "every skill". */
+		const ALL = "__all__";
+
 		/** Escape a skill name for use inside a RegExp. */
 		function escapeRe(value) {
 			return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -74,8 +77,16 @@ window.__ModuleLoader__.load({
 			return [prose, ...tokens].filter(Boolean).join(" ");
 		}
 
-		/** Category id of a skill under the demo rules (`undefined` when uncategorized). */
-		function categoryOf(name) {
+		/**
+		 * Category id of a skill.
+		 * Real configuration wins; the demo rules apply only while the user has
+		 * not defined any category yet (removed once the settings card ships).
+		 */
+		function resolveCategory(name, categories, useDemo) {
+			for (const category of categories) {
+				if (category.skills && category.skills.indexOf(name) >= 0) return category.id;
+			}
+			if (!useDemo) return undefined;
 			for (const rule of DEMO_CATEGORY_RULES) {
 				if (rule.test(name)) return rule.id;
 			}
@@ -262,7 +273,8 @@ window.__ModuleLoader__.load({
 
 			const [skills, setSkills] = react.useState(null);
 			const [error, setError] = react.useState(null);
-			const [openCategory, setOpenCategory] = react.useState(undefined); // undefined = closed
+			// undefined = closed, null = 未分类, ALL = every skill, string = that category id.
+			const [openCategory, setOpenCategory] = react.useState(undefined);
 			const [query, setQuery] = react.useState("");
 			// Names the user wants in the draft (seeded from the draft when opening).
 			const [chosen, setChosen] = react.useState(null);
@@ -291,10 +303,27 @@ window.__ModuleLoader__.load({
 			}, [props.sessionId]);
 
 			const all = react.useMemo(() => (skills || []).map((s) => s.name), [skills]);
-			const known = all;
+
+			// Durable configuration (settings namespace `skill-dock`).
+			const snapshot = props.useConfig ? props.useConfig((s) => s) : undefined;
+			const config = (snapshot && snapshot.value) || {};
+			const configuredCategories = config.categories || [];
+			const useDemo = configuredCategories.length === 0;
+			const categories = useDemo
+				? DEMO_CATEGORY_RULES.map((rule) => ({ id: rule.id, name: rule.name }))
+				: configuredCategories;
+			const aliases = Object.keys(config.aliases || {}).length ? config.aliases : useDemo ? DEMO_ALIASES : {};
+			const pinnedIds = (config.dock && config.dock.pinned) || [];
+			const pinned = pinnedIds.length
+				? pinnedIds
+						.map((id) => categories.find((c) => c.id === id))
+						.filter(Boolean)
+				: categories;
+			const showUncategorized = !(config.picker && config.picker.showUncategorized === false);
+			const limited = (config.picker && config.picker.listLimit) || 200;
 
 			const openPanel = (categoryId) => {
-				setOpenCategory(categoryId === undefined ? null : categoryId);
+				setOpenCategory(categoryId);
 				setQuery("");
 				setChosen(new Set(tokensIn(draft, all)));
 			};
@@ -320,17 +349,30 @@ window.__ModuleLoader__.load({
 			/* ---------------- dock strip ---------------- */
 
 			const inDraft = tokensIn(draft, all);
-			const chips = DEMO_CATEGORY_RULES.map((rule) =>
+			const chips = pinned.map((category) =>
 				h(
 					"button",
 					{
-						key: rule.id,
-						style: Object.assign({}, S.pill, openCategory === rule.id ? S.pillActive : null),
-						onClick: () => (openCategory === rule.id ? closePanel() : openPanel(rule.id)),
+						key: category.id,
+						style: Object.assign({}, S.pill, openCategory === category.id ? S.pillActive : null),
+						onClick: () => (openCategory === category.id ? closePanel() : openPanel(category.id)),
 					},
-					rule.name,
+					category.name,
 				),
 			);
+			if (showUncategorized) {
+				chips.push(
+					h(
+						"button",
+						{
+							key: "__uncategorized__",
+							style: Object.assign({}, S.pill, openCategory === null ? S.pillActive : null),
+							onClick: () => (openCategory === null ? closePanel() : openPanel(undefined)),
+						},
+						"未分类",
+					),
+				);
+			}
 
 			const strip = h(
 				"div",
@@ -341,8 +383,8 @@ window.__ModuleLoader__.load({
 				h(
 					"button",
 					{
-						style: Object.assign({}, S.pill, S.pillMuted),
-						onClick: () => (typeof openCategory === "string" || openCategory === null ? closePanel() : openPanel(undefined)),
+						style: Object.assign({}, S.pill, S.pillMuted, openCategory === ALL ? S.pillActive : null),
+						onClick: () => (openCategory === ALL ? closePanel() : openPanel(ALL)),
 					},
 					"全部技能" + (inDraft.length ? " · 已选 " + inDraft.length : ""),
 				),
@@ -359,16 +401,22 @@ window.__ModuleLoader__.load({
 				rows = h("div", { style: S.notice }, "正在加载技能…");
 			} else {
 				const q = query.trim().toLowerCase();
-				const filtered = skills.filter((skill) => {
-					if (openCategory && categoryOf(skill.name) !== openCategory) return false;
-					if (!q) return true;
-					const alias = DEMO_ALIASES[skill.name] || "";
-					return (
-						skill.name.toLowerCase().includes(q) ||
-						(skill.description || "").toLowerCase().includes(q) ||
-						alias.toLowerCase().includes(q)
-					);
-				});
+				const filtered = skills
+					.filter((skill) => {
+						if (openCategory === null && resolveCategory(skill.name, configuredCategories, useDemo) !== undefined)
+							return false;
+						if (typeof openCategory === "string" && openCategory !== ALL) {
+							if (resolveCategory(skill.name, configuredCategories, useDemo) !== openCategory) return false;
+						}
+						if (!q) return true;
+						const alias = aliases[skill.name] || "";
+						return (
+							skill.name.toLowerCase().includes(q) ||
+							(skill.description || "").toLowerCase().includes(q) ||
+							alias.toLowerCase().includes(q)
+						);
+					})
+					.slice(0, limited);
 				rows =
 					filtered.length === 0
 						? h("div", { style: S.notice }, "没有匹配的技能")
@@ -390,7 +438,7 @@ window.__ModuleLoader__.load({
 										),
 										h("div", { style: S.desc }, skill.description || ""),
 									),
-									DEMO_ALIASES[skill.name] ? h("span", { style: S.alias }, DEMO_ALIASES[skill.name]) : null,
+									aliases[skill.name] ? h("span", { style: S.alias }, aliases[skill.name]) : null,
 								);
 							});
 			}
@@ -437,23 +485,53 @@ window.__ModuleLoader__.load({
 		 * ------------------------------------------------------------------ */
 
 		function apply(ctx) {
-			ctx.slots.inject("conversation.input.dock", () =>
-				ctx.slots.register(
-					{
-						name: "conversation.input.dock",
-						// `list` slots identify each entry by `id` (`key` is the keyed form).
-						id: "skill-dock-row",
-						inject: (sessionId) => ({
-							sessionId,
-							loadSkills: () => ctx.remote.skills.list({ sessionId }),
-						}),
-					},
-					SkillDockRow,
-				),
-			);
+			// One settings scope per plugin: the durable home of categories,
+			// aliases, pins, and the entry layout.
+			const scope = ctx.settingsScope.bind({ namespace: "skill-dock" });
+
+			/** Registration currently mounted, so a layout change can swap it. */
+			let mounted = null;
+			let mountedKey = null;
+
+			const start = (key) => {
+				const dispose = ctx.slots.inject(key, () =>
+					ctx.slots.register(
+						{
+							name: key,
+							// `list` slots identify each entry by `id` (`key` is the keyed form).
+							id: "skill-dock-row",
+							inject: (sessionId) => ({
+								sessionId,
+								loadSkills: () => ctx.remote.skills.list({ sessionId }),
+								hooks: { config: scope },
+							}),
+						},
+						SkillDockRow,
+					),
+				);
+				mounted = dispose;
+				mountedKey = key;
+			};
+
+			const sync = () => {
+				const layout = (scope.getSnapshot().value || {}).entry?.layout || "row";
+				const key = layout === "chip" ? "conversation.input.right" : "conversation.input.dock";
+				if (key === mountedKey) return;
+				if (mounted) mounted();
+				start(key);
+			};
+
+			ctx.effect(() => {
+				sync();
+				const off = scope.subscribe(sync);
+				return () => {
+					off();
+					if (mounted) mounted();
+				};
+			}, "skill-dock: dock entry");
 		}
 
-		const inject = ["slots", "remote", "remote.skills"];
+		const inject = ["slots", "remote", "remote.skills", "settingsScope"];
 
 		exports.apply = apply;
 		exports.inject = inject;
