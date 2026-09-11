@@ -277,6 +277,16 @@ window.__ModuleLoader__.load({
 				cursor: "pointer",
 			},
 			notice: { padding: "12px 14px", fontSize: "13px", color: "var(--dsw-alias-label-tertiary)" },
+			// Placeholder for an empty / loading / failed list: fills the list's
+			// fixed height so an empty category looks exactly as tall as a full one.
+			noticeFill: {
+				height: "100%",
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				fontSize: "13px",
+				color: "var(--dsw-alias-label-tertiary)",
+			},
 		};
 
 		/* ------------------------------------------------------------------ *
@@ -540,9 +550,9 @@ window.__ModuleLoader__.load({
 
 			let rows;
 			if (error) {
-				rows = h("div", { style: S.notice }, error);
+				rows = h("div", { style: S.noticeFill }, error);
 			} else if (skills === null) {
-				rows = h("div", { style: S.notice }, "正在加载技能…");
+				rows = h("div", { style: S.noticeFill }, "正在加载技能…");
 			} else {
 				const q = query.trim().toLowerCase();
 				const filtered = skills
@@ -563,7 +573,7 @@ window.__ModuleLoader__.load({
 					.slice(0, limited);
 				rows =
 					filtered.length === 0
-						? h("div", { style: S.notice }, "没有匹配的技能")
+						? h("div", { style: S.noticeFill }, "没有匹配的技能")
 						: filtered.map((skill) => {
 								const isChosen = !!(chosen && chosen.has(skill.name));
 								const isInDraft = inDraft.indexOf(skill.name) >= 0;
