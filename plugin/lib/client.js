@@ -37,7 +37,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b10";
+		const BUILD = "b11";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -243,9 +243,12 @@ window.__ModuleLoader__.load({
 				// the injected stylesheet; keyboard focus is restored below.
 				outline: "none",
 			},
+			// Selection is expressed by the fill ONLY. The border is deliberately
+			// left exactly as the unselected chip has it (same 0.5px solid, same
+			// colour), so every chip in the strip wears one identical hairline and
+			// nothing can ever read as a thicker frame.
 			pillActive: {
 				background: "var(--dsw-alias-state-business-tertiary)",
-				borderColor: "transparent",
 			},
 			// The "every skill" entry used to keep a dashed outline to mark it as
 			// "not a category". Dashed hairlines render heavier than the solid
