@@ -50,7 +50,9 @@ window.__ModuleLoader__.load({
 				ctx.slots.register(
 					{
 						name: "shell.overlay",
-						key: "skill-dock-smoke",
+						// A `list` slot identifies each entry by `id` (`key` is the
+						// keyed-cell form). Verified against the live client.
+						id: "skill-dock-smoke",
 					},
 					SmokeRow,
 				),

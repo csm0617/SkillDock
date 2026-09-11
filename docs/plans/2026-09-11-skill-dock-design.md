@@ -35,6 +35,21 @@
 | 插件可注册自己的 settings namespace；浏览器半用 `settingsScope` 按 revision 读写 | `docs/cookbook/adding-a-settings-card.md` |
 | 浏览器半由 `dsh.client` + `exports["./client"]` 自动上页，无需重建 Web 应用 | 同上 |
 
+### 2.1 Phase 0 冒烟实测（2026-09-11，本机 0.1.2-rc.1）
+
+| 实测事实 | 证据 |
+|---|---|
+| **第三方 client bundle 产物格式**：`window.__ModuleLoader__.load({ id: '<包名>', factory: (require) => {...} })`，工厂返回 `{ apply, inject, ... }`；工厂内 `require("react")` 可取到 React | 手写 `plugin/lib/client.js`（未使用任何构建预设）被正常接受 |
+| **不需要官方 tsdown preset**：直接进入 `__DSH_BOOT__` 图，成为独立 entry（实测为第 59/60 条） | index HTML 的 `globalThis["__DSH_BOOT__"]` 解析结果 |
+| **bundle 路由**：`/plugins/??<包名>/client.js&rev=<rev>` 返回 200 + `cache-control: immutable`；**错误 rev 返回 404**（不会用 SPA fallback 的 HTML 顶替） | `Invoke-WebRequest` 实测 |
+| **客户端 HMR 生效**：改 `lib/client.js` 后该行 rev 自动变化并重组图，**无需重启实例** | rev `2bbc12e3…` → `2e8ef543…` → `5cdcec11…` |
+| **list 槽位注册项必须用 `id`**（用 `key` 会抛 `list slot "shell.overlay" requires options.id`）；`key` 是 keyed 槽位（如 `settings.plugin.item`）的形式 | 浏览器控制台实测报错 + 修复后正常渲染 |
+| **端到端渲染成功**：`shell.overlay` 上的悬浮胶囊在真实页面渲染出来 | 用户浏览器截图 |
+| `skills/list` Remote **对客户端可用**：命名空间方法 `skills.list({ sessionId })` → `{ skills: [{ name, description, whenToUse?, modelInvocable }] }` | `dsh-api-remotes/lib/client.js` 中的 Typert 描述符 |
+| 同 profile 内已是第三方双半插件的现成范例：`@linxin666/dsh-client-ui-task-board`（host half + `dsh.client` 浏览器半，bundle 层插入 `{id, name}` 行） | `~/.dsh/profiles/web/node_modules/@linxin666/dsh-client-ui-task-board/cordis.patch.yml` |
+| 同 profile 的 `ui-task-board` 持有**进程独占锁**，第二个实例共用 profile 会启动失败；`--patch` 里用 id 覆盖 + `disabled: true`（需重述 `name`）可只在验证实例中禁用它 | 实测错误日志与修复 |
+| 已装插件 `@linxin666/dsh-client-ui-skill-explorer`（侧边栏「技能中心」）**无功能重叠**：它按来源分组做增删/开关，是纯管理层，没有自定义分类或输入区入口 | 其 README |
+
 由此得出两条关键设计约束：
 
 1. **「选择调用哪些技能」不需要新协议**——插入 `/name ` 即可，与内置菜单、手输 token 完全同路径，可重放、可手删。
@@ -215,7 +230,7 @@ inputActions.setDraft / slash/input-insert-text
 
 | 风险 | 严重度 | 对策 |
 |---|---|---|
-| 第三方包必须自产 lazy-CJS factory artifact（官方未发布该 preset） | 高 | Phase 0 先做**最小上页冒烟**：一个空的 `dsh.client` 插件渲染一行文本，确认 `__DSH_BOOT__` 接受该产物；参照知识库记录中同时声明 `dsh.bundle` + `dsh.client` 的社区独立包复刻格式 |
+| ~~第三方包必须自产 lazy-CJS factory artifact（官方未发布该 preset）~~ | ~~高~~ **已消除** | Phase 0 完成：手写 `window.__ModuleLoader__.load({id, factory})` 产物被接受、上页并渲染成功，不需要任何构建预设（见 §2.1） |
 | slot 注册属激活期失败即响 | 中 | 严格 type-only 导入别家 slot 声明，不导入运行时值（bundle-purity 门禁） |
 | `skills/list` 只含 user-invocable 技能 | 中 | 文档写明；`user-invocable: false` 的技能不出现，需要时另开 host 侧通道（非本期目标） |
 | 草稿写入与用户输入竞争 | 中 | 一律以 `draftRev` 做 CAS + 只增删自己插入的 token |
