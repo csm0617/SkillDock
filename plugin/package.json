@@ -1,0 +1,25 @@
+{
+  "name": "dsh-plugin-skill-dock",
+  "version": "0.0.1",
+  "private": true,
+  "description": "SkillDock — skill categories and a skill picker docked in the DSH web composer",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2"
+  }
+}

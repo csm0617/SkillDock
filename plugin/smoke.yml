@@ -1,0 +1,22 @@
+# Phase 0 smoke overlay: mount the SkillDock package into a running profile
+# without touching the profile itself.
+#
+#   dsh --profile web --patch ./plugin/smoke.yml --port 3099 --no-open
+#
+# Notes:
+# - An override row restates every key the original row needs (patch semantics
+#   replace the whole row, not a deep merge), hence id + name below.
+# - `ui-task-board` takes a process-exclusive ledger lock, which the profile's
+#   already-running instance holds; it is disabled here so a second instance can
+#   boot for verification.
+- id: ui-task-board
+  name: '@linxin666/dsh-client-ui-task-board'
+  disabled: true
+
+# The entry points at the package's Host half; the client module scan resolves
+# the nearest owning package.json (ours), reads `dsh.client`, and composes the
+# `./client` export into the __DSH_BOOT__ graph.
+- insert:
+    - id: skill-dock
+      name: './lib/index.js'
+      config: {}
