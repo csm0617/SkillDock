@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b13";
+		const BUILD = "b16";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -166,6 +166,21 @@ window.__ModuleLoader__.load({
 		/* ------------------------------------------------------------------ *
 		 * Styles — DSH semantic tokens only, no literal colors                *
 		 * ------------------------------------------------------------------ */
+
+		/**
+		 * Width of the alias column that leads every skill row. Fixed rather than
+		 * content-sized so the English name (and the indented description) sit at
+		 * the same x in every row.
+		 */
+		const ALIAS_COL = "96px";
+
+		/** Horizontal gap between the alias column and the English name. */
+		const NAME_GAP = "6px";
+
+		/** Sum of two px lengths: "96px" + "6px" -> "102px". */
+		function addLen(a, b) {
+			return parseFloat(a) + parseFloat(b) + "px";
+		}
 
 		const S = {
 			dock: {
@@ -300,16 +315,22 @@ window.__ModuleLoader__.load({
 				borderColor: "transparent",
 			},
 			body: { minWidth: 0, flex: 1 },
+			// The alias leads the row in a fixed-width column, so the English name
+			// begins at one constant x — and the description below is indented by
+			// exactly that column plus the row gap, landing under the English name.
 			name: {
 				display: "flex",
 				alignItems: "baseline",
-				gap: "6px",
+				gap: NAME_GAP,
 				fontSize: "13px",
 				lineHeight: "20px",
 				color: "var(--dsw-alias-label-primary)",
 			},
 			desc: {
 				marginTop: "2px",
+				// Indented past the alias column so the description starts directly
+				// under the English name it describes.
+				marginLeft: addLen(ALIAS_COL, NAME_GAP),
 				fontSize: "12px",
 				lineHeight: "18px",
 				color: "var(--dsw-alias-label-caption)",
@@ -318,6 +339,7 @@ window.__ModuleLoader__.load({
 				textOverflow: "ellipsis",
 				maxWidth: "420px",
 			},
+			// " 已在输入框" marker appended after a skill name.
 			alias: {
 				flex: "none",
 				fontSize: "12px",
@@ -330,17 +352,22 @@ window.__ModuleLoader__.load({
 			// A skill is addressed by its canonical English name, but people
 			// recognise it by the alias they gave it — so the alias leads the row
 			// and carries the emphasis, and the English name follows as a quieter
-			// secondary label. `gap` on S.name supplies the spacing.
+			// secondary label. The column is fixed-width (ALIAS_COL) rather than
+			// content-sized so the English name sits at the same x in every row,
+			// aliased or not; S.desc indents by ALIAS_COL + the row gap to match.
 			aliasLead: {
 				flex: "none",
+				width: ALIAS_COL,
 				fontSize: "13px",
 				fontWeight: 500,
 				color: "var(--dsw-alias-label-primary)",
-				maxWidth: "160px",
 				overflow: "hidden",
 				textOverflow: "ellipsis",
 				whiteSpace: "nowrap",
 			},
+			// Keeps the column occupied on rows whose skill has no alias, so those
+			// rows do not shift left relative to their aliased neighbours.
+			aliasSpacer: { flex: "none", width: ALIAS_COL },
 			nameMuted: {
 				fontSize: "12px",
 				color: "var(--dsw-alias-label-tertiary)",
@@ -680,7 +707,9 @@ window.__ModuleLoader__.load({
 										h(
 											"div",
 											{ style: S.name },
-											aliases[skill.name] ? h("span", { style: S.aliasLead }, aliases[skill.name]) : null,
+											aliases[skill.name]
+												? h("span", { style: S.aliasLead }, aliases[skill.name])
+												: h("span", { style: S.aliasSpacer }),
 											h("span", { style: aliases[skill.name] ? S.nameMuted : null }, skill.name),
 											isInDraft ? h("span", { style: S.alias }, " 已在输入框") : null,
 										),
