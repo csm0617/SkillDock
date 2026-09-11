@@ -278,25 +278,9 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
   <h1>SkillDock · UI 预览</h1>
   <p class="lede">风格对齐 DSH 默认主题：颜色全部走 <code>--dsw-alias-*</code> 语义 token（值取自 <code>@deepseek-ai/dsh-client-ui-theme</code> 产物），几何照官方 composer 规范（.5px 发丝线、popover 用 elevation-panel、dock 行对齐 GoalBar 尺寸）。静态稿，非真实交互。</p>
 
-  <!-- ① 形态 A -->
+  <!-- ① 形态 B（默认） -->
   <section class="stage">
-    <h2>① 形态 A · 单个总芯片 —— 落在 composer 卡片内工具行右侧（conversation.input.right）</h2>
-    <div class="composer">
-      <div class="draft"><span class="placeholder">给这个项目写一份 README…</span></div>
-      <div class="toolrow">
-        <button class="iconbtn"><svg class="ico"><use href="#i-plus"/></svg></button>
-        <button class="control"><svg class="ico ico-sm"><use href="#i-shield"/></svg> 工作区内修改 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
-        <span class="spacer"></span>
-        <button class="control"><svg class="ico ico-sm"><use href="#i-tag"/></svg> 技能 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
-        <button class="iconbtn"><svg class="ico"><use href="#i-send"/></svg></button>
-      </div>
-    </div>
-    <p class="hint">芯片紧邻「工作区内修改」的右侧，样式与它完全一致（白底 + 发丝线 + 深色文字），不显示数量。</p>
-  </section>
-
-  <!-- ② 形态 B -->
-  <section class="stage">
-    <h2>② 形态 B · 一排分类芯片 —— 落在 composer 卡片上方整行（conversation.input.dock）</h2>
+    <h2>① 形态 B · 一排分类芯片 —— 默认形态，落在 composer 卡片上方整行（conversation.input.dock）</h2>
     <div class="dock">
       <span class="dock-label">技能</span>
       <button class="pill">开发工具</button>
@@ -318,7 +302,23 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
         <button class="iconbtn"><svg class="ico"><use href="#i-send"/></svg></button>
       </div>
     </div>
-    <p class="hint">两种形态互斥，由设置 <code>entry.layout</code> 切换；形态 B 下点击分类 chip 直接打开面板并定位到该分类。</p>
+    <p class="hint">默认形态：每个固定分类一个 chip，点击直接打开面板并定位到该分类。两种形态互斥，由设置 <code>entry.layout</code> 切换。</p>
+  </section>
+
+  <!-- ② 形态 A（可选） -->
+  <section class="stage">
+    <h2>② 形态 A · 单个总芯片 —— 可选形态，落在 composer 卡片内工具行右侧（conversation.input.right）</h2>
+    <div class="composer">
+      <div class="draft"><span class="placeholder">给这个项目写一份 README…</span></div>
+      <div class="toolrow">
+        <button class="iconbtn"><svg class="ico"><use href="#i-plus"/></svg></button>
+        <button class="control"><svg class="ico ico-sm"><use href="#i-shield"/></svg> 工作区内修改 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
+        <span class="spacer"></span>
+        <button class="control"><svg class="ico ico-sm"><use href="#i-tag"/></svg> 技能 <svg class="ico ico-sm"><use href="#i-chevron"/></svg></button>
+        <button class="iconbtn"><svg class="ico"><use href="#i-send"/></svg></button>
+      </div>
+    </div>
+    <p class="hint">芯片紧邻「工作区内修改」的右侧，样式与它完全一致（白底 + 发丝线 + 深色文字），不显示数量。</p>
   </section>
 
   <!-- ③ 面板 -->
@@ -384,8 +384,8 @@ h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
       <header>SkillDock · 技能分类</header>
       <div class="body">
         <div class="sub" style="margin-top:0">入口形态</div>
-        <label class="opt"><input type="radio" name="layout" checked> 单个总芯片 <span class="where">composer 卡片内 · 工具行右侧</span></label>
-        <label class="opt"><input type="radio" name="layout"> 一排分类芯片 <span class="where">composer 卡片上方整行</span></label>
+        <label class="opt"><input type="radio" name="layout" checked> 一排分类芯片 <span class="where">默认 · composer 卡片上方整行</span></label>
+        <label class="opt"><input type="radio" name="layout"> 单个总芯片 <span class="where">composer 卡片内 · 工具行右侧</span></label>
 
         <div class="sub">分类</div>
         <div class="cat">

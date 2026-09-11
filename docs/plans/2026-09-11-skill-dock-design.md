@@ -72,7 +72,7 @@ skill-dock/
 | 注册位置 | 组件 | 作用 |
 |---|---|---|
 | `conversation.input.right` | `CategoryChip` | **「单个总芯片」模式**下的唯一入口：位于 composer 卡片内的工具行右侧（紧邻「工作区内修改」）；文案为「技能」+ 标签图标 + chevron，**样式与「工作区内修改」完全一致**（白底、`.5px` 发丝线、深色文字），不显示数量徽标 |
-| `conversation.input.dock` | `DockRow` | **「一排分类芯片」模式**下的入口：位于 composer 卡片上方的整行，每个固定分类一个 chip，点击直接展开该分类技能 |
+| `conversation.input.dock` | `DockRow` | **「一排分类芯片」模式（默认）**下的入口：位于 composer 卡片上方的整行，每个固定分类一个 chip，点击直接展开该分类技能 |
 | `settings.plugin.item` | `SettingsCard` | 分类的增删改、技能归属、入口形态（总芯片/一排）、dock 固定项与排序 |
 
 两种入口形态**互斥**：由配置 `entry.layout` 决定，运行时只注册其中一种（切换设置即时生效，另一种的 slot 注册随 effect 回收）。
@@ -93,8 +93,8 @@ interface Category {
 interface Config {
   categories: Category[]              // 分类定义与归属
   entry: {
-    layout: 'chip' | 'row'            // 'chip'=单个总芯片（composer 卡片内工具行右侧）
-                                      // 'row' =一排分类芯片（composer 卡片上方整行）
+    layout: 'chip' | 'row'            // 'row' =一排分类芯片（composer 卡片上方整行）——**默认**
+                                      // 'chip'=单个总芯片（composer 卡片内工具行右侧）
   }
   }
   dock: {
@@ -118,13 +118,13 @@ interface Config {
 
 ### 5.1 入口形态（二选一，设置里切换）
 
-**形态 A —— 单个总芯片（`entry.layout = 'chip'`，默认）**
+**形态 A —— 单个总芯片（`entry.layout = 'chip'`，可选）**
 
 - 落点：composer 卡片内工具行右侧（`conversation.input.right`），紧邻「工作区内修改」。
 - 显示：标签图标 + 文案「技能」+ chevron；视觉与「工作区内修改」控件逐项对齐（同样的高度、`.5px` 发丝线、pill 圆角、`label-primary` 文字、hover 用 `interactive-bg-hover`），**不显示分类名与数量**。
 - 点击打开面板；再次点击、点击外部或 Esc 关闭。
 
-**形态 B —— 一排分类芯片（`entry.layout = 'row'`）**
+**形态 B —— 一排分类芯片（`entry.layout = 'row'`，默认）**
 
 - 落点：composer 卡片上方整行（`conversation.input.dock`）。
 - 显示：`dock.pinned` 中的每个分类一个 chip（按配置顺序），末尾一个「全部技能」入口。
@@ -233,6 +233,6 @@ inputActions.setDraft / slash/input-insert-text
 1. **分类数据只存插件配置**（settings namespace `skill-dock`），不读不写 `SKILL.md`；不使用 frontmatter 作为种子或回退。
 2. 采用单包双半架构（方案 A）；不自建 Typert Remote。
 3. 技能调用复用内置 `/name` 通道，不新增模型可见输入、不新增 session 事件。
-4. 入口形态二选一，由设置 `entry.layout` 决定：**单个总芯片**放 composer 卡片内工具行右侧（`conversation.input.right`）；**一排分类芯片**放 composer 卡片上方整行（`conversation.input.dock`）。
+4. 入口形态二选一，由设置 `entry.layout` 决定（**默认 `'row'`**）：**一排分类芯片**放 composer 卡片上方整行（`conversation.input.dock`）；**单个总芯片**放 composer 卡片内工具行右侧（`conversation.input.right`），样式与「工作区内修改」控件一致、不显示数量。
 5. 面板选择为**两段式**：勾选不直接改草稿，点「确认插入」统一写入 `/name` token；关闭面板丢弃未确认的勾选。
 6. 通过官方 slot 扩展点注入 UI，不修改 DSH 仓库源码、不 hack DOM。
