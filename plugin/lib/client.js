@@ -32,6 +32,13 @@ window.__ModuleLoader__.load({
 			PRIMITIVES = null;
 		}
 
+		/**
+		 * Bumped on every bundle change so a screenshot can be tied to a build:
+		 * it renders in the settings card's status line. Bump it whenever the
+		 * behaviour someone is verifying changes.
+		 */
+		const BUILD = "b8";
+
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
 
@@ -55,7 +62,9 @@ window.__ModuleLoader__.load({
 				// draw our own only for keyboard focus (`:focus-visible`), so a
 				// mouse click on a chip no longer leaves a heavy outline.
 				".skill-dock-root button:focus{outline:none}" +
-				".skill-dock-root button:focus-visible{outline:2px solid var(--dsw-alias-label-tertiary);outline-offset:-2px}";
+				// `!important` because the element carries an inline `outline: none`;
+				// this keeps keyboard focus visible without re-enabling the mouse ring.
+				".skill-dock-root button:focus-visible{outline:2px solid var(--dsw-alias-label-tertiary) !important;outline-offset:-2px}";
 			if (!existing) document.head.appendChild(tag);
 		}
 
@@ -228,6 +237,9 @@ window.__ModuleLoader__.load({
 				cornerShape: "round",
 				cursor: "pointer",
 				whiteSpace: "nowrap",
+				// Inline, so the browser's default focus ring cannot compete with
+				// the injected stylesheet; keyboard focus is restored below.
+				outline: "none",
 			},
 			pillActive: {
 				background: "var(--dsw-alias-state-business-tertiary)",
@@ -289,6 +301,7 @@ window.__ModuleLoader__.load({
 				borderRadius: "8px",
 				cornerShape: "round",
 				cursor: "pointer",
+				outline: "none",
 			},
 			cbx: {
 				width: "15px",
@@ -351,6 +364,7 @@ window.__ModuleLoader__.load({
 				borderRadius: "8px",
 				cornerShape: "round",
 				cursor: "pointer",
+				outline: "none",
 			},
 			btnGhost: {
 				height: "28px",
@@ -362,6 +376,7 @@ window.__ModuleLoader__.load({
 				borderRadius: "8px",
 				cornerShape: "round",
 				cursor: "pointer",
+				outline: "none",
 			},
 			notice: { padding: "12px 14px", fontSize: "13px", color: "var(--dsw-alias-label-tertiary)" },
 		};
@@ -461,6 +476,7 @@ window.__ModuleLoader__.load({
 				borderRadius: "6px",
 				cornerShape: "round",
 				cursor: "pointer",
+				outline: "none",
 			},
 			newCat: {
 				display: "flex",
@@ -963,6 +979,7 @@ window.__ModuleLoader__.load({
 								? "正在读取配置…"
 								: "配置命名空间不可用",
 						CATALOG.names.length === 0 ? " · 打开一个会话后会加载技能列表用于选择" : "",
+						" · " + BUILD,
 					),
 				),
 			);
