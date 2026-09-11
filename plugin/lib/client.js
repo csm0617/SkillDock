@@ -210,28 +210,28 @@ window.__ModuleLoader__.load({
 				color: "var(--dsw-alias-label-secondary)",
 			},
 			spacer: { flex: 1 },
-			// Category chips follow DSH's own composer controls (the model selector
-			// trigger): borderless, unfilled, secondary label, pill radius.
+			// Unselected chips keep the thin hairline look; the SELECTED chip drops
+			// its border entirely (the active fill is the only signal), which is
+			// what "don't draw a frame once it is selected" asks for.
 			pill: {
 				display: "inline-flex",
 				alignItems: "center",
-				gap: "4px",
-				height: "28px",
-				padding: "0 8px",
+				gap: "6px",
+				height: "26px",
+				padding: "0 10px",
 				fontSize: "13px",
-				fontWeight: 500,
 				lineHeight: "20px",
-				color: "var(--dsw-alias-label-secondary)",
-				background: "transparent",
-				border: "none",
-				borderRadius: "24px",
+				color: "var(--dsw-alias-label-primary)",
+				background: "var(--dsw-alias-bg-base)",
+				border: "0.5px solid var(--dsw-alias-border-l2)",
+				borderRadius: "999px",
 				cornerShape: "round",
 				cursor: "pointer",
 				whiteSpace: "nowrap",
 			},
 			pillActive: {
 				background: "var(--dsw-alias-state-business-tertiary)",
-				color: "var(--dsw-alias-label-primary)",
+				borderColor: "transparent",
 			},
 			// The "every skill" entry keeps a dashed outline: it is not a category.
 			pillMuted: {
