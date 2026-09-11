@@ -42,18 +42,21 @@ window.__ModuleLoader__.load({
 		 */
 		function installStyles() {
 			if (typeof document === "undefined") return;
-			if (document.querySelector('style[data-plugin-css="' + CSS_ID + '"]') !== null) return;
-			const tag = document.createElement("style");
+			const existing = document.querySelector('style[data-plugin-css="' + CSS_ID + '"]');
+			const tag = existing || document.createElement("style");
 			tag.dataset.plugin = "dsh-plugin-skill-dock";
 			tag.dataset.pluginCss = CSS_ID;
+			// Text is always (re)assigned, so a hot-reloaded bundle updates the
+			// rules instead of keeping the first version's stylesheet.
 			tag.textContent =
 				".skill-dock-search-input::placeholder{color:var(--dsw-alias-label-caption);opacity:1}" +
+				".skill-dock-pill:hover{background:var(--dsw-alias-interactive-bg-hover)}" +
 				// Official treatment: suppress the browser's default focus ring and
 				// draw our own only for keyboard focus (`:focus-visible`), so a
 				// mouse click on a chip no longer leaves a heavy outline.
 				".skill-dock-root button:focus{outline:none}" +
 				".skill-dock-root button:focus-visible{outline:2px solid var(--dsw-alias-label-tertiary);outline-offset:-2px}";
-			document.head.appendChild(tag);
+			if (!existing) document.head.appendChild(tag);
 		}
 
 		/** Search glyph: DSH's icon when available, otherwise a matching inline one. */
@@ -207,30 +210,33 @@ window.__ModuleLoader__.load({
 				color: "var(--dsw-alias-label-secondary)",
 			},
 			spacer: { flex: 1 },
+			// Category chips follow DSH's own composer controls (the model selector
+			// trigger): borderless, unfilled, secondary label, pill radius.
 			pill: {
 				display: "inline-flex",
 				alignItems: "center",
-				gap: "6px",
-				height: "26px",
-				padding: "0 10px",
+				gap: "4px",
+				height: "28px",
+				padding: "0 8px",
 				fontSize: "13px",
+				fontWeight: 500,
 				lineHeight: "20px",
-				color: "var(--dsw-alias-label-primary)",
-				background: "var(--dsw-alias-bg-base)",
-				border: "0.5px solid var(--dsw-alias-border-l2)",
-				borderRadius: "999px",
+				color: "var(--dsw-alias-label-secondary)",
+				background: "transparent",
+				border: "none",
+				borderRadius: "24px",
 				cornerShape: "round",
 				cursor: "pointer",
 				whiteSpace: "nowrap",
 			},
 			pillActive: {
 				background: "var(--dsw-alias-state-business-tertiary)",
-				borderColor: "transparent",
+				color: "var(--dsw-alias-label-primary)",
 			},
+			// The "every skill" entry keeps a dashed outline: it is not a category.
 			pillMuted: {
 				background: "transparent",
-				borderStyle: "dashed",
-				borderColor: "var(--dsw-alias-border-l4)",
+				border: "0.5px dashed var(--dsw-alias-border-l4)",
 				color: "var(--dsw-alias-label-tertiary)",
 			},
 			panel: {
@@ -579,6 +585,7 @@ window.__ModuleLoader__.load({
 					"button",
 					{
 						key: category.id,
+						className: "skill-dock-pill",
 						style: Object.assign({}, S.pill, openCategory === category.id ? S.pillActive : null),
 						onClick: () => (openCategory === category.id ? closePanel() : openPanel(category.id)),
 					},
@@ -591,6 +598,7 @@ window.__ModuleLoader__.load({
 						"button",
 						{
 							key: NONE,
+							className: "skill-dock-pill",
 							style: Object.assign({}, S.pill, openCategory === NONE ? S.pillActive : null),
 							onClick: () => (openCategory === NONE ? closePanel() : openPanel(NONE)),
 						},
@@ -608,6 +616,7 @@ window.__ModuleLoader__.load({
 				h(
 					"button",
 					{
+						className: "skill-dock-pill",
 						style: Object.assign({}, S.pill, S.pillMuted, openCategory === ALL ? S.pillActive : null),
 						onClick: () => (openCategory === ALL ? closePanel() : openPanel(ALL)),
 					},
