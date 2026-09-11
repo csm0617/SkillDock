@@ -47,7 +47,12 @@ window.__ModuleLoader__.load({
 			tag.dataset.plugin = "dsh-plugin-skill-dock";
 			tag.dataset.pluginCss = CSS_ID;
 			tag.textContent =
-				".skill-dock-search-input::placeholder{color:var(--dsw-alias-label-caption);opacity:1}";
+				".skill-dock-search-input::placeholder{color:var(--dsw-alias-label-caption);opacity:1}" +
+				// Official treatment: suppress the browser's default focus ring and
+				// draw our own only for keyboard focus (`:focus-visible`), so a
+				// mouse click on a chip no longer leaves a heavy outline.
+				".skill-dock-root button:focus{outline:none}" +
+				".skill-dock-root button:focus-visible{outline:2px solid var(--dsw-alias-label-tertiary);outline-offset:-2px}";
 			document.head.appendChild(tag);
 		}
 
@@ -610,7 +615,7 @@ window.__ModuleLoader__.load({
 				),
 			);
 
-			if (openCategory === undefined) return strip;
+			if (openCategory === undefined) return h("div", { className: "skill-dock-root" }, strip);
 
 			/* ---------------- panel ---------------- */
 
@@ -666,7 +671,7 @@ window.__ModuleLoader__.load({
 
 			return h(
 				"div",
-				null,
+				{ className: "skill-dock-root" },
 				strip,
 				h(
 					"div",
@@ -903,7 +908,7 @@ window.__ModuleLoader__.load({
 
 			return h(
 				"div",
-				{ style: C.card },
+				{ style: C.card, className: "skill-dock-root" },
 				h("div", { style: C.head }, "SkillDock · 技能分类"),
 				h(
 					"div",
