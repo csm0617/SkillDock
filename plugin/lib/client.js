@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b21";
+		const BUILD = "b22";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -621,6 +621,12 @@ window.__ModuleLoader__.load({
 			};
 			const closePanel = () => setOpenCategory(undefined);
 
+			// If the 未分类 entry is switched off while its panel is open, the panel
+			// would be left with no visible chip to toggle it shut — close it.
+			react.useEffect(() => {
+				if (!showUncategorized && openCategory === NONE) setOpenCategory(undefined);
+			}, [showUncategorized, openCategory]);
+
 			const toggle = (name) => {
 				setChosen((prev) => {
 					const next = new Set(prev || []);
@@ -789,6 +795,9 @@ window.__ModuleLoader__.load({
 			const aliases = config.aliases || {};
 			const pinned = (config.dock && config.dock.pinned) || [];
 			const layout = (config.entry && config.entry.layout) || "row";
+			// Absent means shown: `false` is the only value that hides the entry,
+			// matching the host schema's `.default(true)`.
+			const showUncategorized = !(config.picker && config.picker.showUncategorized === false);
 			const status = snapshot ? snapshot.status : "loading";
 
 			/** Catalog names, plus names already referenced by the configuration. */
@@ -1009,6 +1018,25 @@ window.__ModuleLoader__.load({
 						}),
 						"单个总芯片",
 						h("span", { style: C.optNote }, "composer 卡片内 · 工具行右侧"),
+					),
+
+					h("div", { style: C.sub }, "面板入口"),
+					h(
+						"label",
+						{ style: C.opt },
+						h("input", {
+							type: "checkbox",
+							checked: showUncategorized,
+							onChange: (event) =>
+								write(
+									"picker",
+									Object.assign({}, config.picker || {}, {
+										showUncategorized: event.target.checked,
+									}),
+								),
+						}),
+						"展示「未分类」入口",
+						h("span", { style: C.optNote }, "关闭后 dock 栏不再提供未分类分类芯片"),
 					),
 
 					h("div", { style: C.sub }, "分类与技能（别名在技能行右侧就地编辑）"),
