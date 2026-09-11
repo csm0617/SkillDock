@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b34";
+		const BUILD = "b35";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -602,17 +602,18 @@ window.__ModuleLoader__.load({
 				cornerShape: "round",
 				maxWidth: "260px",
 			},
-			// Primary action. 34px, matching C.input and C.select exactly, because it
-			// sits inline with them. (The official card's save button is 30px, but it
-			// never shares a line with a field — here the 4px gap was visible.)
-			// Blue fill: the same accent the composer's primary send button uses.
+			// Primary action. Background and text colour are taken from the composer's
+			// send button — `button-info-fill` with white text — so the accent matches
+			// DSH's own primary action exactly. Shape stays as it was (34px tall, 8px
+			// radius) so the button keeps sitting level with the select and alias
+			// inputs on its line; only the colours follow the send button.
 			addBtn: {
 				height: "34px",
 				padding: "0 14px",
 				fontSize: "13px",
 				lineHeight: 1.5,
 				fontWeight: 500,
-				color: "var(--dsw-alias-label-inverted)",
+				color: "#fff",
 				background: "var(--dsw-alias-button-info-fill)",
 				border: "1px solid transparent",
 				borderRadius: "8px",
