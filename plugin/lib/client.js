@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b30";
+		const BUILD = "b31";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -181,6 +181,13 @@ window.__ModuleLoader__.load({
 		 * the same x in every row.
 		 */
 		const ALIAS_COL = "96px";
+
+		/**
+		 * Width of the skill-name column inside a category card. The alias input on
+		 * each skill row and the 加入分类 button in the adder both begin after this
+		 * column, so the whole card reads as one left-aligned grid.
+		 */
+		const SKILL_COL = "200px";
 
 		/** Horizontal gap between the alias column and the English name. */
 		const NAME_GAP = "6px";
@@ -561,14 +568,25 @@ window.__ModuleLoader__.load({
 				padding: "0 2px",
 			},
 			skillRow: { display: "flex", alignItems: "center", gap: "8px", padding: "4px 0" },
+			// Fixed width, not `flex: 0 1 200px`: a shrinkable column made the alias
+			// input's left edge move with the skill name's length, so rows did not
+			// line up with each other or with the 加入分类 button below. Alias rows
+			// and the adder share this width through SKILL_COL.
 			skillName: {
-				flex: "0 1 200px",
+				flex: "none",
+				width: SKILL_COL,
 				fontSize: "13px",
 				color: "var(--dsw-alias-label-primary)",
 				fontFamily: "ui-monospace, Consolas, monospace",
+				overflow: "hidden",
+				textOverflow: "ellipsis",
+				whiteSpace: "nowrap",
 			},
 			empty: { fontSize: "12px", lineHeight: 1.5, color: "var(--dsw-alias-label-tertiary)", padding: "2px 0" },
 			adder: { display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" },
+			// Holds the skill-name column open in the adder, so 加入分类 starts at the
+			// same x as the alias inputs above it.
+			adderSpacer: { flex: "none", width: SKILL_COL },
 			select: {
 				height: "34px",
 				fontSize: "13px",
@@ -580,9 +598,11 @@ window.__ModuleLoader__.load({
 				cornerShape: "round",
 				maxWidth: "260px",
 			},
-			// Primary action, matching the official card's dark filled button.
+			// Primary action. 34px, matching C.input and C.select exactly, because it
+			// sits inline with them. (The official card's save button is 30px, but it
+			// never shares a line with a field — here the 4px gap was visible.)
 			addBtn: {
-				height: "30px",
+				height: "34px",
 				padding: "0 14px",
 				fontSize: "13px",
 				lineHeight: 1.5,
@@ -1011,6 +1031,7 @@ window.__ModuleLoader__.load({
 						h(
 							"div",
 							{ style: C.adder },
+							h("span", { style: C.adderSpacer }),
 							h(
 								"select",
 								{ id: selectId, style: C.select, defaultValue: "" },
