@@ -1,283 +1,425 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-ds-theme="light">
 <head>
 <meta charset="utf-8">
 <title>SkillDock UI 预览</title>
 <style>
-  :root{
-    --bg:#ffffff; --panel:#ffffff; --chip:#f2f3f5; --chip-hover:#e9eaec;
-    --line:#e6e7e9; --text:#1c1d1f; --muted:#8a8d93; --accent:#3b6ef5;
-    --shadow:0 8px 24px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; padding:28px; background:#fafafa; color:var(--text);
-    font:14px/1.5 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
-  }
-  h1{font-size:18px;margin:0 0 4px}
-  .sub{color:var(--muted);font-size:13px;margin-bottom:24px}
-  .stage{max-width:760px;margin:0 auto 34px;background:var(--bg);border:1px solid var(--line);
-         border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-  .stage h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 14px;letter-spacing:.02em}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* ─────────────────────────────────────────────────────────────
+   设计 token：取自 @deepseek-ai/dsh-client-ui-theme 产物中的真实值
+   （--dsw-static-* 调色板 + --dsw-alias-* 语义别名）。
+   组件层只消费语义别名，不出现任何字面颜色。
+   ───────────────────────────────────────────────────────────── */
+:root{
+  /* 静态调色板（真实值） */
+  --p-bluish-00:#fff;   --p-bluish-50:#f9fafb;  --p-bluish-60:#f5f6f7;
+  --p-bluish-75:#f1f3f5;--p-bluish-100:#ebeef2; --p-bluish-150:#e9ecf2;
+  --p-bluish-200:#e1e5ee;--p-bluish-400:#adb2b8;--p-bluish-600:#81858c;
+  --p-bluish-700:#61666b;--p-bluish-950:#151517;--p-bluish-1000:#0f1115;
+  --p-deepseek-50:#edf3fe;--p-deepseek-100:#e4edfd;--p-deepseek-500:#4176e6;
+  --p-green-100:#e6faed;--p-green-500:#22c55e;
+  --p-amber-100:#fef5e7;--p-amber-500:#f59e0b;
+  --p-red-50:#fef2f2;  --p-red-600:#ec1313;
 
-  /* ── 通用 chip ───────────────────────────── */
-  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);color:#3d4046;
-        border:none;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
-  .chip:hover{background:var(--chip-hover)}
-  .chip .caret{opacity:.5;font-size:10px}
-  .chip.on{background:#e8efff;color:#2450c8}
-  .chip.ghost{background:transparent;border:1px dashed var(--line);color:var(--muted)}
-  .badge{background:var(--accent);color:#fff;border-radius:999px;font-size:11px;
-         min-width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+  /* 语义别名（真实映射） */
+  --dsw-alias-bg-base:var(--p-bluish-00);
+  --dsw-alias-bg-layer-1:var(--p-bluish-00);
+  --dsw-alias-label-primary:var(--p-bluish-1000);
+  --dsw-alias-label-primary-dimmed:var(--p-bluish-950);
+  --dsw-alias-label-secondary:var(--p-bluish-700);
+  --dsw-alias-label-tertiary:var(--p-bluish-600);
+  --dsw-alias-label-caption:var(--p-bluish-400);
+  --dsw-alias-label-inverted:var(--p-bluish-00);
+  --dsw-alias-border-l1:#0000000a;
+  --dsw-alias-border-l2:#0000001a;
+  --dsw-alias-border-l4:#00000029;
+  --dsw-alias-interactive-bg-hover:#2631480f;
+  --dsw-alias-interactive-bg-active:#2631481a;
+  --dsw-alias-state-business-primary:var(--p-deepseek-500);
+  --dsw-alias-state-business-tertiary:var(--p-deepseek-100);
+  --dsw-alias-state-success-primary:var(--p-green-500);
+  --dsw-alias-state-warn-primary:var(--p-amber-500);
+  --dsw-alias-state-error-primary:var(--p-red-600);
+  --dsw-specific-tip:var(--p-bluish-60);
+  --dsw-specific-sidebar-fill:var(--p-bluish-50);
+  --dsw-specific-menu:var(--p-bluish-00);
 
-  /* ── dock 行（composer 卡片上方）─────────── */
-  .dock{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;
-        padding:9px 12px;background:#fcfcfd;margin-bottom:10px}
-  .dock .label{font-size:12px;color:var(--muted);margin-right:2px}
-  .dock .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;
-              border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer}
-  .dock .pill:hover{background:var(--chip)}
-  .dot{width:8px;height:8px;border-radius:3px;display:inline-block}
+  /* 高度（真实值，含 .5px 发丝线作为第一层阴影） */
+  --dsw-elevation-stroke:0 0 0 .5px var(--dsw-alias-border-l4);
+  --dsw-elevation-panel:var(--dsw-elevation-stroke),0 3px 8px 0 #00000008,0 0 16px 0 #00000005;
+  --dsw-elevation-prominent:var(--dsw-elevation-stroke),0 3px 8px 0 #0000000a,0 0 20px 0 #0000000d;
+  --dsw-elevation-soft:var(--dsw-elevation-stroke),0 4px 16px 0 #00000008,0 0 24px 0 #00000008;
 
-  /* ── composer 卡片 ──────────────────────── */
-  .composer{border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px 14px;
-            box-shadow:0 1px 2px rgba(0,0,0,.03)}
-  .draft{min-height:44px;color:#3d4046;font-size:14px;padding:2px 2px 10px}
-  .token{display:inline-block;background:#eaf0ff;color:#2b56d4;border-radius:6px;padding:1px 7px;
-         font-family:ui-monospace,Consolas,monospace;font-size:12.5px;margin-right:4px}
-  .placeholder{color:#a9adb4}
-  .toolrow{display:flex;align-items:center;gap:8px;border-top:1px solid #f0f1f3;padding-top:10px}
-  .toolrow .spacer{flex:1}
-  .icon-btn{width:30px;height:30px;border-radius:999px;background:var(--chip);border:none;cursor:pointer;
-            display:inline-flex;align-items:center;justify-content:center;font-size:15px;color:#4b4f56}
-  .send{width:30px;height:30px;border-radius:999px;background:#d9dbe0;border:none;color:#fff;
-        display:inline-flex;align-items:center;justify-content:center}
+  /* 字体角色（真实值） */
+  --dsw-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --font-s-14:400 14px/22px var(--dsw-font-family);
+  --font-s-strong-14:500 14px/22px var(--dsw-font-family);
+  --font-xs-13:400 13px/20px var(--dsw-font-family);
+  --font-xs-strong-13:500 13px/20px var(--dsw-font-family);
+  --font-xxs-12:400 12px/18px var(--dsw-font-family);
+  --font-xxs-strong-12:500 12px/18px var(--dsw-font-family);
 
-  /* ── 弹出面板 ────────────────────────────── */
-  .popover{width:360px;background:var(--panel);border:1px solid var(--line);border-radius:12px;
-           box-shadow:var(--shadow);overflow:hidden}
-  .search{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid #f0f1f3;
-          color:var(--muted);font-size:13px}
-  .tabs{display:flex;gap:6px;padding:10px 12px;overflow:hidden;border-bottom:1px solid #f4f5f7}
-  .tab{background:var(--chip);border:none;border-radius:999px;padding:5px 11px;font-size:12.5px;
-       color:#4b4f56;cursor:pointer;white-space:nowrap}
-  .tab.on{background:#e8efff;color:#2450c8;font-weight:600}
-  .list{max-height:250px;overflow:auto;padding:6px 0}
-  .item{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;cursor:pointer}
-  .item:hover{background:#f8f9fb}
-  .cbx{width:15px;height:15px;border-radius:4px;border:1.5px solid #c8cbd0;flex:0 0 auto;
-       margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
-  .cbx.on{background:var(--accent);border-color:var(--accent)}
-  .tag-draft{font-size:10.5px;color:#8a8d93;border:1px solid var(--line);border-radius:5px;
-             padding:0 5px;margin-left:6px;vertical-align:1px}
-  .glyph{width:20px;height:20px;border-radius:5px;flex:0 0 auto;display:flex;align-items:center;
-         justify-content:center;color:#fff;font-size:11px;font-weight:700;margin-top:1px}
-  .item .name{font-size:13.5px;color:#1c1d1f}
-  .item .desc{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;
-              white-space:nowrap;max-width:250px}
-  .item.off .name,.item.off .desc{color:#b6b9bf}
-  .check{margin-left:auto;color:var(--accent);font-size:14px;padding-top:2px}
-  .popfoot{border-top:1px solid #f0f1f3;padding:9px 14px;display:flex;justify-content:space-between;
-           color:#4b4f56;font-size:12.5px}
-  .popfoot span{cursor:pointer}
-  .popfoot span:hover{color:var(--accent)}
+  /* composer 几何（真实值） */
+  --dsh-chat-content-width:760px;
+  --dsh-composer-card-max-width:calc(var(--dsh-chat-content-width) + 32px);
+  --dsh-composer-dock-inset:8px;
+  --dsh-composer-side-clearance:16px;
+  --dsh-composer-stack-gap:6px;
+}
 
-  /* ── 设置卡片 ────────────────────────────── */
-  .card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .card h3{font-size:13.5px;margin:0;padding:12px 14px;border-bottom:1px solid #f0f1f3;background:#fcfcfd}
-  .card .body{padding:14px}
-  .cat{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);
-       border-radius:9px;margin-bottom:8px}
-  .cat .nm{font-size:13.5px}
-  .cat .cnt{color:var(--muted);font-size:12px}
-  .cat .acts{margin-left:auto;display:flex;gap:12px;color:var(--muted);font-size:12px}
-  .cat .acts span{cursor:pointer}
-  .cat .acts span:hover{color:var(--accent)}
-  .mini{font-size:12px;color:var(--muted);margin:14px 0 8px}
-  .pinrow{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px}
-  .grip{color:#c4c7cc;cursor:grab}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:32px 24px;
+  background:var(--dsw-alias-bg-base);
+  color:var(--dsw-alias-label-primary);
+  font:var(--font-s-14);
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:var(--dsh-composer-card-max-width);margin:0 auto}
+
+/* 章节说明 */
+.stage{margin-bottom:36px}
+h1{font:500 20px/28px var(--dsw-font-family);margin:0 0 6px}
+.lede{color:var(--dsw-alias-label-tertiary);font:var(--font-xs-13);margin:0 0 26px}
+h2{font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption);
+   margin:0 0 12px;letter-spacing:.02em;text-transform:none}
+.hint{font:var(--font-xxs-12);color:var(--dsw-alias-label-caption);margin-top:10px}
+
+/* ── composer 卡片（官方：elevation-soft + 无边框）────── */
+.composer{
+  background:var(--dsw-alias-bg-base);
+  border-radius:12px;corner-shape:round;
+  box-shadow:var(--dsw-elevation-soft);
+  padding:12px 14px;
+  width:100%;max-width:var(--dsh-composer-card-max-width);margin:0 auto;
+}
+.draft{min-height:46px;font:var(--font-s-14);color:var(--dsw-alias-label-primary);padding:2px 4px 10px}
+.draft .placeholder{color:var(--dsw-alias-label-caption)}
+.token{
+  display:inline-block;font:var(--font-xxs-strong-12);
+  background:var(--dsw-alias-state-business-tertiary);
+  color:var(--dsw-alias-label-primary);
+  border-radius:6px;corner-shape:round;padding:2px 7px;margin-right:4px;
+}
+.toolrow{display:flex;align-items:center;gap:8px;padding-top:10px}
+.toolrow .spacer{flex:1}
+
+/* ── 工具行内的控件（官方 chip 规则：发丝线 + pill + hover 用交互别名）── */
+.control{
+  display:inline-flex;align-items:center;gap:6px;
+  height:28px;padding:0 10px;
+  font:var(--font-xs-13);color:var(--dsw-alias-label-primary);
+  background:var(--dsw-alias-bg-base);
+  border:.5px solid var(--dsw-alias-border-l2);
+  border-radius:999px;corner-shape:round;
+  cursor:pointer;white-space:nowrap;
+}
+.control:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.control .caret{color:var(--dsw-alias-label-caption);font-size:10px}
+.control.is-active{
+  background:var(--dsw-alias-state-business-tertiary);
+  border-color:transparent;
+}
+.iconbtn{
+  width:28px;height:28px;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;border:.5px solid transparent;border-radius:999px;corner-shape:round;
+  color:var(--dsw-alias-label-tertiary);cursor:pointer;font-size:15px;
+}
+.iconbtn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}
+
+/* 计数徽标 */
+.badge{
+  min-width:16px;height:16px;padding:0 4px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-inverted);
+  border-radius:999px;corner-shape:round;
+  font:var(--font-xxs-strong-12);font-size:11px;line-height:1;
+}
+
+/* ── dock 行（对齐官方 GoalBar dock：tip 底 + 发丝线 + 12px 圆角 + 36px 高）── */
+.dock{
+  width:calc(100% - 2 * var(--dsh-composer-side-clearance) - 4 * var(--dsh-composer-dock-inset));
+  max-width:calc(var(--dsh-composer-card-max-width) - 4 * var(--dsh-composer-dock-inset));
+  margin:0 auto var(--dsh-composer-stack-gap);
+  display:flex;align-items:center;gap:10px;
+  height:36px;padding:4px 5px 4px 12px;
+  background:var(--dsw-specific-tip);
+  border:.5px solid var(--dsw-alias-border-l1);
+  border-radius:12px;corner-shape:round;
+}
+.dock .dock-label{font:var(--font-xs-strong-13);color:var(--dsw-alias-label-secondary)}
+.dock .spacer{flex:1}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  height:26px;padding:0 10px;
+  font:var(--font-xs-13);color:var(--dsw-alias-label-primary);
+  background:var(--dsw-alias-bg-base);
+  border:.5px solid var(--dsw-alias-border-l2);
+  border-radius:999px;corner-shape:round;cursor:pointer;
+}
+.pill:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.pill.is-active{background:var(--dsw-alias-state-business-tertiary);border-color:transparent}
+.pill.is-muted{border-style:dashed;border-color:var(--dsw-alias-border-l4);color:var(--dsw-alias-label-tertiary);background:transparent}
+.dot{width:8px;height:8px;border-radius:2px;corner-shape:round;display:inline-block}
+
+/* ── popover 面板（官方：border:0 + elevation-panel）── */
+.popover{
+  width:380px;
+  background:var(--dsw-specific-menu);
+  border:0;border-radius:12px;corner-shape:round;
+  box-shadow:var(--dsw-elevation-panel);
+  overflow:hidden;
+}
+.search{
+  display:flex;align-items:center;gap:8px;
+  padding:11px 14px;
+  border-bottom:.5px solid var(--dsw-alias-border-l1);
+  font:var(--font-xs-13);color:var(--dsw-alias-label-caption);
+}
+.tabs{
+  display:flex;gap:6px;padding:10px 12px;overflow:hidden;
+  border-bottom:.5px solid var(--dsw-alias-border-l1);
+}
+.tab{
+  height:26px;padding:0 11px;
+  display:inline-flex;align-items:center;
+  font:var(--font-xxs-12);color:var(--dsw-alias-label-secondary);
+  background:var(--dsw-specific-tip);
+  border:.5px solid transparent;border-radius:999px;corner-shape:round;cursor:pointer;
+}
+.tab:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.tab.is-active{
+  background:var(--dsw-alias-state-business-tertiary);
+  color:var(--dsw-alias-label-primary);font:var(--font-xxs-strong-12);
+}
+.list{max-height:258px;overflow:auto;padding:4px 6px}
+.item{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:8px;border-radius:8px;corner-shape:round;cursor:pointer;
+}
+.item:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.cbx{
+  width:15px;height:15px;margin-top:3px;flex:none;
+  border:.5px solid var(--dsw-alias-border-l4);border-radius:4px;corner-shape:round;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--dsw-alias-label-inverted);font-size:10px;
+}
+.cbx.is-on{background:var(--dsw-alias-state-business-primary);border-color:transparent}
+.glyph{
+  width:20px;height:20px;margin-top:1px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:5px;corner-shape:round;
+  color:var(--dsw-alias-label-inverted);font:var(--font-xxs-strong-12);font-size:11px;
+}
+.item .body{min-width:0}
+.item .name{font:var(--font-xs-13);color:var(--dsw-alias-label-primary)}
+.item .desc{
+  margin-top:2px;font:var(--font-xxs-12);color:var(--dsw-alias-label-caption);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;
+}
+.item.is-gone .name,.item.is-gone .desc{color:var(--dsw-alias-label-caption);opacity:.6}
+.tag{
+  margin-left:6px;padding:0 5px;
+  font:var(--font-xxs-12);font-size:10px;
+  color:var(--dsw-alias-label-tertiary);
+  border:.5px solid var(--dsw-alias-border-l2);border-radius:5px;corner-shape:round;
+}
+.popfoot{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 14px;border-top:.5px solid var(--dsw-alias-border-l1);
+  font:var(--font-xxs-12);color:var(--dsw-alias-label-tertiary);
+}
+.popfoot .count{color:var(--dsw-alias-label-caption)}
+.popfoot .acts{display:flex;align-items:center;gap:10px}
+.btn{
+  height:28px;padding:0 12px;
+  font:var(--font-xs-strong-13);
+  border:.5px solid transparent;border-radius:8px;corner-shape:round;cursor:pointer;
+}
+.btn.primary{background:var(--dsw-alias-state-business-primary);color:var(--dsw-alias-label-inverted)}
+.btn.ghost{background:transparent;color:var(--dsw-alias-label-secondary);border-color:var(--dsw-alias-border-l2)}
+.btn.ghost:hover{background:var(--dsw-alias-interactive-bg-hover)}
+.link{color:var(--dsw-alias-label-tertiary);cursor:pointer}
+.link:hover{color:var(--dsw-alias-state-business-primary)}
+
+/* ── 设置卡片（官方：发丝线边框 + tip 头部）── */
+.card{
+  border:.5px solid var(--dsw-alias-border-l1);
+  border-radius:12px;corner-shape:round;overflow:hidden;
+  background:var(--dsw-alias-bg-base);
+}
+.card > header{
+  padding:12px 14px;
+  background:var(--dsw-specific-tip);
+  border-bottom:.5px solid var(--dsw-alias-border-l1);
+  font:var(--font-xs-strong-13);color:var(--dsw-alias-label-primary);
+}
+.card .body{padding:14px}
+.cat{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 10px;margin-bottom:8px;
+  border:.5px solid var(--dsw-alias-border-l1);border-radius:9px;corner-shape:round;
+}
+.cat .nm{font:var(--font-xs-13)}
+.cat .cnt{font:var(--font-xxs-12);color:var(--dsw-alias-label-caption)}
+.cat .acts{margin-left:auto;display:flex;gap:12px;font:var(--font-xxs-12);color:var(--dsw-alias-label-tertiary)}
+.cat .acts span{cursor:pointer}
+.cat .acts span:hover{color:var(--dsw-alias-state-business-primary)}
+.cat.add{
+  justify-content:center;border-style:dashed;border-color:var(--dsw-alias-border-l4);
+  color:var(--dsw-alias-label-tertiary);font:var(--font-xxs-12);cursor:pointer;
+}
+.sub{margin:16px 0 8px;font:var(--font-xxs-strong-12);color:var(--dsw-alias-label-caption)}
+.opt{display:flex;align-items:center;gap:8px;padding:5px 0;font:var(--font-xs-13)}
+.opt .where{font:var(--font-xxs-12);color:var(--dsw-alias-label-caption)}
+.grip{color:var(--dsw-alias-label-caption);cursor:grab}
 </style>
 </head>
 <body>
+<div class="page">
 
-<h1>SkillDock · UI 预览</h1>
-<div class="sub">静态稿，用于确认形态与信息层级（不含真实交互）。视觉对齐 DSH Web 当前风格。</div>
+  <h1>SkillDock · UI 预览</h1>
+  <p class="lede">风格对齐 DSH 默认主题：颜色全部走 <code>--dsw-alias-*</code> 语义 token（值取自 <code>@deepseek-ai/dsh-client-ui-theme</code> 产物），几何照官方 composer 规范（.5px 发丝线、popover 用 elevation-panel、dock 行对齐 GoalBar 尺寸）。静态稿，非真实交互。</p>
 
-<!-- ① 折叠态：芯片在「工作区内修改」右侧 -->
-<div class="stage">
-  <h2>① 形态 A —— 单个总芯片（设置 entry.layout = chip，落在 composer 卡片内工具行右侧）</h2>
+  <!-- ① 形态 A -->
+  <section class="stage">
+    <h2>① 形态 A · 单个总芯片 —— 落在 composer 卡片内工具行右侧（conversation.input.right）</h2>
+    <div class="composer">
+      <div class="draft"><span class="placeholder">给这个项目写一份 README…</span></div>
+      <div class="toolrow">
+        <button class="iconbtn">＋</button>
+        <button class="control">工作区内修改 <span class="caret">⌄</span></button>
+        <span class="spacer"></span>
+        <button class="control is-active">技能分类 <span class="badge">2</span> <span class="caret">⌄</span></button>
+        <button class="iconbtn">➤</button>
+      </div>
+    </div>
+    <p class="hint">芯片紧邻「工作区内修改」的右侧；徽标显示当前输入框内已引用的技能数。</p>
+  </section>
 
-  <div class="composer">
-    <div class="draft"><span class="placeholder">给这个项目写一份 README…</span></div>
-
-    <div class="toolrow">
-      <button class="icon-btn">＋</button>
-      <button class="chip">🛡 工作区内修改 <span class="caret">⌄</span></button>
+  <!-- ② 形态 B -->
+  <section class="stage">
+    <h2>② 形态 B · 一排分类芯片 —— 落在 composer 卡片上方整行（conversation.input.dock）</h2>
+    <div class="dock">
+      <span class="dock-label">技能</span>
+      <button class="pill"><span class="dot" style="background:var(--p-deepseek-500)"></span>开发工具</button>
+      <button class="pill"><span class="dot" style="background:var(--p-amber-500)"></span>内容创作</button>
+      <button class="pill"><span class="dot" style="background:var(--p-green-500)"></span>数据分析</button>
+      <button class="pill is-muted">＋ 固定分类</button>
       <span class="spacer"></span>
-      <button class="chip on">🏷 开发工具 <span class="badge">2</span> <span class="caret">⌄</span></button>
-      <button class="icon-btn">➤</button>
+      <button class="pill is-muted">全部技能 ⌄</button>
     </div>
-  </div>
-</div>
-
-<!-- ② dock 行 -->
-<div class="stage">
-  <h2>② 形态 B —— 一排分类芯片（设置 entry.layout = row，落在 composer 卡片上方整行）</h2>
-
-  <div class="dock">
-    <span class="label">技能</span>
-    <span class="pill"><span class="dot" style="background:#5b8def"></span>开发工具</span>
-    <span class="pill"><span class="dot" style="background:#e2a03f"></span>内容创作</span>
-    <span class="pill"><span class="dot" style="background:#4bbf9a"></span>数据分析</span>
-    <span class="pill ghost">＋ 固定分类</span>
-    <span class="spacer" style="flex:1"></span>
-    <span class="pill" style="border-style:dashed;color:#8a8d93">全部技能 ⌄</span>
-  </div>
-
-  <div class="composer">
-    <div class="draft">
-      <span class="token">/tencent-docs</span><span class="token">/cloudstudio-deploy</span>
-      <span class="placeholder">把这两份文档整理成一页摘要…</span>
+    <div class="composer">
+      <div class="draft">
+        <span class="token">/tencent-docs</span><span class="token">/cloudstudio-deploy</span>
+        <span class="placeholder">把这两份文档整理成一页摘要…</span>
+      </div>
+      <div class="toolrow">
+        <button class="iconbtn">＋</button>
+        <button class="control">工作区内修改 <span class="caret">⌄</span></button>
+        <span class="spacer"></span>
+        <button class="iconbtn">➤</button>
+      </div>
     </div>
-    <div class="toolrow">
-      <button class="icon-btn">＋</button>
-      <button class="chip">🛡 工作区内修改 <span class="caret">⌄</span></button>
-      <span class="spacer"></span>
-      <button class="chip on">🏷 开发工具 <span class="badge">2</span> <span class="caret">⌄</span></button>
-      <button class="icon-btn">➤</button>
-    </div>
-  </div>
-</div>
+    <p class="hint">两种形态互斥，由设置 <code>entry.layout</code> 切换；形态 B 下点击分类 chip 直接打开面板并定位到该分类。</p>
+  </section>
 
-<!-- ③ 展开面板 -->
-<div class="stage">
-  <h2>③ 展开面板 —— 搜索 + 分类 tab + 勾选，底部「确认插入」统一写入</h2>
-
-  <div class="row" style="align-items:flex-start">
+  <!-- ③ 面板 -->
+  <section class="stage">
+    <h2>③ 展开面板 —— 搜索 + 分类 tab + 勾选，底部「确认插入」统一写入</h2>
     <div class="popover">
       <div class="search">🔍 搜索技能</div>
       <div class="tabs">
-        <button class="tab on">开发工具</button>
+        <button class="tab is-active">开发工具</button>
         <button class="tab">内容创作</button>
         <button class="tab">数据分析</button>
         <button class="tab">未分类 3</button>
       </div>
       <div class="list">
         <div class="item">
-          <div class="cbx on">✓</div>
-          <div class="glyph" style="background:#7ec27e">C</div>
-          <div>
-            <div class="name">cloudstudio-deploy <span class="tag-draft">已在输入框</span></div>
+          <div class="cbx is-on">✓</div>
+          <div class="glyph" style="background:var(--p-green-500)">C</div>
+          <div class="body">
+            <div class="name">cloudstudio-deploy <span class="tag">已在输入框</span></div>
             <div class="desc">Deploy static sites to CloudStudio sandbox</div>
           </div>
         </div>
         <div class="item">
-          <div class="cbx on">✓</div>
-          <div class="glyph" style="background:#68b5c8">T</div>
-          <div>
+          <div class="cbx is-on">✓</div>
+          <div class="glyph" style="background:var(--p-deepseek-500)">T</div>
+          <div class="body">
             <div class="name">tencent-docs</div>
             <div class="desc">腾讯文档个人版（docs.qq.com）在线云文档</div>
           </div>
         </div>
         <div class="item">
           <div class="cbx"></div>
-          <div class="glyph" style="background:#9a9fe0">A</div>
-          <div>
+          <div class="glyph" style="background:var(--p-bluish-400)">A</div>
+          <div class="body">
             <div class="name">ardot-design-core</div>
             <div class="desc">Foundational workflow and hard rules shared…</div>
           </div>
         </div>
-        <div class="item off">
+        <div class="item is-gone">
           <div class="cbx"></div>
-          <div class="glyph" style="background:#c9ccd2">E</div>
-          <div>
+          <div class="glyph" style="background:var(--p-bluish-200)">E</div>
+          <div class="body">
             <div class="name">expert-manager</div>
             <div class="desc">专家包的全生命周期运营：转化（已失效）</div>
           </div>
         </div>
       </div>
-      <div class="popfoot" style="background:#fcfcfd">
-        <span style="color:#8a8d93">已选 2 项（1 项已在输入框）</span>
-        <span style="display:flex;gap:10px;align-items:center">
-          <span style="color:#8a8d93">取消</span>
-          <button style="background:var(--accent);color:#fff;border:none;border-radius:7px;
-                         padding:5px 12px;font-size:12.5px;cursor:pointer">确认插入</button>
+      <div class="popfoot">
+        <span class="count">已选 2 项（1 项已在输入框）</span>
+        <span class="acts">
+          <button class="btn ghost">取消</button>
+          <button class="btn primary">确认插入</button>
         </span>
       </div>
       <div class="popfoot">
-        <span>＋ 新建分类</span>
-        <span>管理分类与 dock →</span>
+        <span class="link">＋ 新建分类</span>
+        <span class="link">管理分类与 dock →</span>
       </div>
     </div>
+    <p class="hint">勾选不直接改动草稿；点「确认插入」才一次性写入对应 <code>/name</code> token。关闭面板＝丢弃未确认的勾选。</p>
+  </section>
 
-    <div style="flex:1;min-width:230px">
-      <div class="mini">勾选不直接改动草稿；点「确认插入」后一次性写入对应 <code>/name</code> token。关闭面板＝丢弃未确认的勾选。</div>
-      <div class="composer">
-        <div class="draft">
-          <span class="token">/tencent-docs</span><span class="token">/cloudstudio-deploy</span>
-          <span class="placeholder">继续输入…</span>
+  <!-- ④ 设置 -->
+  <section class="stage">
+    <h2>④ 设置卡片 —— 入口形态 + 分类管理 + dock 固定项（settings.plugin.item）</h2>
+    <div class="card">
+      <header>SkillDock · 技能分类</header>
+      <div class="body">
+        <div class="sub" style="margin-top:0">入口形态</div>
+        <label class="opt"><input type="radio" name="layout" checked> 单个总芯片 <span class="where">composer 卡片内 · 工具行右侧</span></label>
+        <label class="opt"><input type="radio" name="layout"> 一排分类芯片 <span class="where">composer 卡片上方整行</span></label>
+
+        <div class="sub">分类</div>
+        <div class="cat">
+          <span class="dot" style="width:10px;height:10px;background:var(--p-deepseek-500)"></span>
+          <span class="nm">开发工具</span><span class="cnt">4 个技能</span>
+          <span class="acts"><span>编辑</span><span>删除</span></span>
         </div>
-        <div class="toolrow">
-          <button class="icon-btn">＋</button>
-          <button class="chip">🛡 工作区内修改 <span class="caret">⌄</span></button>
-          <span class="spacer"></span>
-          <button class="chip on">🏷 开发工具 <span class="badge">2</span> <span class="caret">⌄</span></button>
-          <button class="icon-btn">➤</button>
+        <div class="cat">
+          <span class="dot" style="width:10px;height:10px;background:var(--p-amber-500)"></span>
+          <span class="nm">内容创作</span><span class="cnt">3 个技能</span>
+          <span class="acts"><span>编辑</span><span>删除</span></span>
         </div>
+        <div class="cat">
+          <span class="dot" style="width:10px;height:10px;background:var(--p-green-500)"></span>
+          <span class="nm">数据分析</span><span class="cnt">2 个技能</span>
+          <span class="acts"><span>编辑</span><span>删除</span></span>
+        </div>
+        <div class="cat add">＋ 新建分类</div>
+
+        <div class="sub">固定在 dock 栏的分类（拖动排序）</div>
+        <label class="opt"><span class="grip">⠿</span><input type="checkbox" checked> 开发工具</label>
+        <label class="opt"><span class="grip">⠿</span><input type="checkbox" checked> 内容创作</label>
+        <label class="opt"><span class="grip">⠿</span><input type="checkbox"> 数据分析</label>
       </div>
     </div>
-  </div>
+  </section>
+
 </div>
-
-<!-- ④ 设置卡片 -->
-<div class="stage">
-  <h2>④ 设置卡片 —— 分类管理 + dock 固定项（settings.plugin.item）</h2>
-
-  <div class="card">
-    <h3>SkillDock · 技能分类</h3>
-    <div class="body">
-      <div class="cat">
-        <span class="dot" style="background:#5b8def;width:10px;height:10px;border-radius:3px"></span>
-        <span class="nm">开发工具</span>
-        <span class="cnt">4 个技能</span>
-        <span class="acts"><span>编辑</span><span>删除</span></span>
-      </div>
-      <div class="cat">
-        <span class="dot" style="background:#e2a03f;width:10px;height:10px;border-radius:3px"></span>
-        <span class="nm">内容创作</span>
-        <span class="cnt">3 个技能</span>
-        <span class="acts"><span>编辑</span><span>删除</span></span>
-      </div>
-      <div class="cat">
-        <span class="dot" style="background:#4bbf9a;width:10px;height:10px;border-radius:3px"></span>
-        <span class="nm">数据分析</span>
-        <span class="cnt">2 个技能</span>
-        <span class="acts"><span>编辑</span><span>删除</span></span>
-      </div>
-      <div class="cat ghost" style="border-style:dashed;justify-content:center;color:#8a8d93">
-        ＋ 新建分类
-      </div>
-
-      <div class="mini">入口形态（二选一）</div>
-      <div class="pinrow">
-        <label style="display:flex;align-items:center;gap:8px">
-          <input type="radio" name="layout" checked> 单个总芯片 —— 放在 composer 卡片内（工具行右侧）
-        </label>
-      </div>
-      <div class="pinrow">
-        <label style="display:flex;align-items:center;gap:8px">
-          <input type="radio" name="layout"> 一排分类芯片 —— 放在 composer 卡片上方整行
-        </label>
-      </div>
-
-      <div class="mini">固定在 dock 栏的分类（拖动排序）</div>
-      <div class="pinrow"><span class="grip">⠿</span><input type="checkbox" checked> 开发工具</div>
-      <div class="pinrow"><span class="grip">⠿</span><input type="checkbox" checked> 内容创作</div>
-      <div class="pinrow"><span class="grip">⠿</span><input type="checkbox"> 数据分析</div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
