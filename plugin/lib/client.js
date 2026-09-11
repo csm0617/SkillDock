@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b17";
+		const BUILD = "b18";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-skill-dock/search.css";
@@ -357,18 +357,18 @@ window.__ModuleLoader__.load({
 				textOverflow: "ellipsis",
 				whiteSpace: "nowrap",
 			},
-			// A skill is addressed by its canonical English name, but people
-			// recognise it by the alias they gave it — so the alias leads the row
-			// and carries the emphasis, and the English name follows as a quieter
-			// secondary label. The column is fixed-width (ALIAS_COL) rather than
-			// content-sized so the English name sits at the same x in every row,
-			// aliased or not; S.desc indents by ALIAS_COL + the row gap to match.
+			// The English name is what the row is actually about — it is the skill's
+			// canonical, invocable identity — so it carries the primary (black)
+			// weight. The alias only leads it positionally, for recognition, and is
+			// deliberately quieter. The column is fixed-width (ALIAS_COL) rather
+			// than content-sized so the English name sits at the same x in every
+			// row, aliased or not; S.desc indents by ALIAS_COL + the row gap.
 			aliasLead: {
 				flex: "none",
 				width: ALIAS_COL,
 				fontSize: "13px",
 				fontWeight: 500,
-				color: "var(--dsw-alias-label-primary)",
+				color: "var(--dsw-alias-label-secondary)",
 				overflow: "hidden",
 				textOverflow: "ellipsis",
 				whiteSpace: "nowrap",
@@ -376,9 +376,12 @@ window.__ModuleLoader__.load({
 			// Keeps the column occupied on rows whose skill has no alias, so those
 			// rows do not shift left relative to their aliased neighbours.
 			aliasSpacer: { flex: "none", width: ALIAS_COL },
-			nameMuted: {
-				fontSize: "12px",
-				color: "var(--dsw-alias-label-tertiary)",
+			// The canonical skill name. Primary colour on every row, aliased or
+			// not — the alias beside it never changes how strongly it reads.
+			namePrimary: {
+				fontSize: "13px",
+				fontWeight: 500,
+				color: "var(--dsw-alias-label-primary)",
 			},
 			foot: {
 				display: "flex",
@@ -718,7 +721,7 @@ window.__ModuleLoader__.load({
 											aliases[skill.name]
 												? h("span", { style: S.aliasLead }, aliases[skill.name])
 												: h("span", { style: S.aliasSpacer }),
-											h("span", { style: aliases[skill.name] ? S.nameMuted : null }, skill.name),
+											h("span", { style: S.namePrimary }, skill.name),
 											isInDraft ? h("span", { style: S.alias }, " 已在输入框") : null,
 										),
 										h("div", { style: S.desc }, skill.description || ""),
