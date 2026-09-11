@@ -46,6 +46,12 @@ window.__ModuleLoader__.load({
 		/** Sentinel category selection meaning "every skill". */
 		const ALL = "__all__";
 
+		/**
+		 * Last catalog the dock row loaded, shared inside this bundle so the
+		 * settings card can offer the same skill names without a second request.
+		 */
+		const CATALOG = { sessionId: undefined, names: [] };
+
 		/** Escape a skill name for use inside a RegExp. */
 		function escapeRe(value) {
 			return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -264,6 +270,128 @@ window.__ModuleLoader__.load({
 		};
 
 		/* ------------------------------------------------------------------ *
+		 * Settings-card styles                                                *
+		 * ------------------------------------------------------------------ */
+
+		const C = {
+			card: {
+				border: "0.5px solid var(--dsw-alias-border-l1)",
+				borderRadius: "12px",
+				cornerShape: "round",
+				overflow: "hidden",
+				background: "var(--dsw-alias-bg-base)",
+			},
+			head: {
+				padding: "12px 14px",
+				background: "var(--dsw-specific-tip)",
+				borderBottom: "0.5px solid var(--dsw-alias-border-l1)",
+				fontSize: "13px",
+				fontWeight: 500,
+				color: "var(--dsw-alias-label-primary)",
+			},
+			body: { padding: "14px" },
+			sub: {
+				margin: "16px 0 8px",
+				fontSize: "12px",
+				fontWeight: 500,
+				color: "var(--dsw-alias-label-caption)",
+			},
+			subFirst: {
+				margin: "0 0 8px",
+				fontSize: "12px",
+				fontWeight: 500,
+				color: "var(--dsw-alias-label-caption)",
+			},
+			opt: { display: "flex", alignItems: "center", gap: "8px", padding: "5px 0", fontSize: "13px" },
+			optNote: { fontSize: "12px", color: "var(--dsw-alias-label-caption)" },
+			cat: {
+				border: "0.5px solid var(--dsw-alias-border-l1)",
+				borderRadius: "9px",
+				cornerShape: "round",
+				padding: "10px",
+				marginBottom: "8px",
+			},
+			catHead: { display: "flex", alignItems: "center", gap: "8px" },
+			input: {
+				height: "26px",
+				padding: "0 8px",
+				fontSize: "13px",
+				color: "var(--dsw-alias-label-primary)",
+				background: "var(--dsw-specific-tip)",
+				border: "0.5px solid transparent",
+				borderRadius: "6px",
+				cornerShape: "round",
+				outline: "none",
+			},
+			nameInput: { flex: "0 1 180px" },
+			aliasInput: { flex: "1 1 140px" },
+			catCount: { fontSize: "12px", color: "var(--dsw-alias-label-caption)" },
+			linkBtn: {
+				marginLeft: "auto",
+				fontSize: "12px",
+				color: "var(--dsw-alias-label-tertiary)",
+				background: "transparent",
+				border: "none",
+				cursor: "pointer",
+				padding: "0 2px",
+			},
+			skillRow: { display: "flex", alignItems: "center", gap: "8px", padding: "4px 0" },
+			skillName: {
+				flex: "0 1 200px",
+				fontSize: "13px",
+				color: "var(--dsw-alias-label-primary)",
+				fontFamily: "ui-monospace, Consolas, monospace",
+			},
+			empty: { fontSize: "12px", color: "var(--dsw-alias-label-caption)", padding: "2px 0" },
+			adder: { display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" },
+			select: {
+				height: "26px",
+				fontSize: "13px",
+				color: "var(--dsw-alias-label-primary)",
+				background: "var(--dsw-specific-tip)",
+				border: "0.5px solid transparent",
+				borderRadius: "6px",
+				cornerShape: "round",
+				maxWidth: "260px",
+			},
+			addBtn: {
+				height: "26px",
+				padding: "0 10px",
+				fontSize: "13px",
+				color: "var(--dsw-alias-label-inverted)",
+				background: "var(--dsw-alias-button-info-fill)",
+				border: "0.5px solid transparent",
+				borderRadius: "6px",
+				cornerShape: "round",
+				cursor: "pointer",
+			},
+			newCat: {
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				gap: "6px",
+				padding: "9px",
+				border: "0.5px dashed var(--dsw-alias-border-l4)",
+				borderRadius: "9px",
+				cornerShape: "round",
+				color: "var(--dsw-alias-label-tertiary)",
+				fontSize: "12px",
+				cursor: "pointer",
+				background: "transparent",
+				width: "100%",
+			},
+			pinRow: { display: "flex", alignItems: "center", gap: "8px", padding: "4px 0", fontSize: "13px" },
+			pinMove: {
+				background: "transparent",
+				border: "none",
+				color: "var(--dsw-alias-label-tertiary)",
+				cursor: "pointer",
+				fontSize: "12px",
+			},
+			status: { fontSize: "12px", color: "var(--dsw-alias-label-caption)", marginTop: "10px" },
+		};
+
+		/* ------------------------------------------------------------------ *
 		 * The dock row + picker                                               *
 		 * ------------------------------------------------------------------ */
 
@@ -303,6 +431,12 @@ window.__ModuleLoader__.load({
 			}, [props.sessionId]);
 
 			const all = react.useMemo(() => (skills || []).map((s) => s.name), [skills]);
+
+			// Publish the catalog for the settings card (same module, no second request).
+			react.useEffect(() => {
+				CATALOG.sessionId = props.sessionId;
+				CATALOG.names = all;
+			}, [all, props.sessionId]);
 
 			// Durable configuration (settings namespace `skill-dock`).
 			const snapshot = props.useConfig ? props.useConfig((s) => s) : undefined;
@@ -481,6 +615,259 @@ window.__ModuleLoader__.load({
 		}
 
 		/* ------------------------------------------------------------------ *
+		 * Settings card (settings.plugin.item, keyed by the namespace)         *
+		 * ------------------------------------------------------------------ */
+
+		function SettingsCard(props) {
+			const snapshot = props.useConfig ? props.useConfig((s) => s) : undefined;
+			const config = (snapshot && snapshot.value) || {};
+			const categories = config.categories || [];
+			const aliases = config.aliases || {};
+			const pinned = (config.dock && config.dock.pinned) || [];
+			const layout = (config.entry && config.entry.layout) || "row";
+			const status = snapshot ? snapshot.status : "loading";
+
+			/** Catalog names, plus names already referenced by the configuration. */
+			const knownNames = react.useMemo(() => {
+				const set = new Set(CATALOG.names);
+				for (const category of categories) for (const name of category.skills || []) set.add(name);
+				for (const name of Object.keys(aliases)) set.add(name);
+				return Array.from(set).sort();
+			}, [CATALOG.names.length, categories, aliases]);
+
+			const write = (field, value) => {
+				const scope = props.scope;
+				if (!scope) return;
+				Promise.resolve(scope.set(field, value)).catch(() => {});
+			};
+
+			const replaceCategory = (id, next) =>
+				write(
+					"categories",
+					categories.map((category) => (category.id === id ? next : category)),
+				);
+
+			const newCategoryId = () => {
+				let n = 1;
+				while (categories.some((category) => category.id === "cat-" + n)) n += 1;
+				return "cat-" + n;
+			};
+
+			const addCategory = () => {
+				const id = newCategoryId();
+				write("categories", categories.concat([{ id, name: "新分类", skills: [] }]));
+			};
+
+			const removeCategory = (id) =>
+				write(
+					"categories",
+					categories.filter((category) => category.id !== id),
+				);
+
+			const renameCategory = (id, name) => {
+				const current = categories.find((category) => category.id === id);
+				if (current) replaceCategory(id, Object.assign({}, current, { name }));
+			};
+
+			const assignSkill = (id, name) => {
+				const current = categories.find((category) => category.id === id);
+				if (!current || (current.skills || []).indexOf(name) >= 0) return;
+				replaceCategory(id, Object.assign({}, current, { skills: (current.skills || []).concat([name]) }));
+			};
+
+			const unassignSkill = (id, name) => {
+				const current = categories.find((category) => category.id === id);
+				if (!current) return;
+				replaceCategory(
+					id,
+					Object.assign({}, current, { skills: (current.skills || []).filter((s) => s !== name) }),
+				);
+			};
+
+			const setAlias = (name, value) => {
+				const next = Object.assign({}, aliases);
+				if (value && value.trim()) next[name] = value.trim();
+				else delete next[name];
+				write("aliases", next);
+			};
+
+			const togglePin = (id) =>
+				write(
+					"dock",
+					Object.assign({}, config.dock || {}, {
+						pinned: pinned.indexOf(id) >= 0 ? pinned.filter((p) => p !== id) : pinned.concat([id]),
+					}),
+				);
+
+			const movePin = (id, delta) => {
+				const order = pinned.indexOf(id) >= 0 ? pinned.slice() : pinned.concat([id]);
+				const from = order.indexOf(id);
+				const to = from + delta;
+				if (to < 0 || to >= order.length) return;
+				order.splice(to, 0, order.splice(from, 1)[0]);
+				write("dock", Object.assign({}, config.dock || {}, { pinned: order }));
+			};
+
+			/* -------- category blocks -------- */
+
+			const nodes = [];
+
+			categories.forEach((category) => {
+				const skills = category.skills || [];
+				const candidates = knownNames.filter((name) => skills.indexOf(name) < 0);
+				const selectId = "skill-dock-add-" + category.id;
+
+				const skillRows = skills.length
+					? skills.map((name) =>
+							h(
+								"div",
+								{ key: name, style: C.skillRow },
+								h("span", { style: C.skillName }, name),
+								h("input", {
+									style: Object.assign({}, C.input, C.aliasInput),
+									defaultValue: aliases[name] || "",
+									placeholder: "别名（可留空）",
+									onBlur: (event) => {
+										if ((aliases[name] || "") !== event.target.value) setAlias(name, event.target.value);
+									},
+								}),
+								h("button", { style: C.linkBtn, onClick: () => unassignSkill(category.id, name) }, "移除"),
+							),
+						)
+					: [h("div", { key: "empty", style: C.empty }, "还没有技能")];
+
+				nodes.push(
+					h(
+						"div",
+						{ key: category.id, style: C.cat },
+						h(
+							"div",
+							{ style: C.catHead },
+							h("input", {
+								style: Object.assign({}, C.input, C.nameInput),
+								defaultValue: category.name,
+								onBlur: (event) => {
+									if (category.name !== event.target.value && event.target.value.trim())
+										renameCategory(category.id, event.target.value.trim());
+								},
+							}),
+							h("span", { style: C.catCount }, skills.length + " 个技能"),
+							h("button", { style: C.linkBtn, onClick: () => removeCategory(category.id) }, "删除分类"),
+						),
+						skillRows.length ? h("div", { style: { marginTop: "8px" } }, skillRows) : null,
+						h(
+							"div",
+							{ style: C.adder },
+							h(
+								"select",
+								{ id: selectId, style: C.select, defaultValue: "" },
+								h("option", { value: "" }, "选择技能…"),
+								candidates.map((name) => h("option", { key: name, value: name }, name)),
+							),
+							h(
+								"button",
+								{
+									style: C.addBtn,
+									onClick: () => {
+										const el = document.getElementById(selectId);
+										if (el && el.value) assignSkill(category.id, el.value);
+									},
+								},
+								"加入分类",
+							),
+						),
+					),
+				);
+			});
+
+			nodes.push(
+				h(
+					"button",
+					{ key: "__new__", style: C.newCat, onClick: addCategory },
+					"＋ 新建分类",
+				),
+			);
+
+			/* -------- pins -------- */
+
+			const pinNodes = categories.length
+				? categories.map((category) => {
+						const on = pinned.indexOf(category.id) >= 0;
+						return h(
+							"div",
+							{ key: category.id, style: C.pinRow },
+							h("input", {
+								type: "checkbox",
+								checked: on,
+								onChange: () => togglePin(category.id),
+							}),
+							h("span", null, category.name),
+							on
+								? h(
+										"span",
+										{ style: { display: "flex", gap: "6px", marginLeft: "auto" } },
+										h("button", { style: C.pinMove, onClick: () => movePin(category.id, -1) }, "上移"),
+										h("button", { style: C.pinMove, onClick: () => movePin(category.id, 1) }, "下移"),
+									)
+								: null,
+						);
+					})
+				: [h("div", { key: "none", style: C.empty }, "还没有分类")];
+
+			return h(
+				"div",
+				{ style: C.card },
+				h("div", { style: C.head }, "SkillDock · 技能分类"),
+				h(
+					"div",
+					{ style: C.body },
+					h("div", { style: C.subFirst }, "入口形态"),
+					h(
+						"label",
+						{ style: C.opt },
+						h("input", {
+							type: "radio",
+							name: "skill-dock-layout",
+							checked: layout === "row",
+							onChange: () => write("entry", Object.assign({}, config.entry || {}, { layout: "row" })),
+						}),
+						"一排分类芯片",
+						h("span", { style: C.optNote }, "默认 · composer 卡片上方整行"),
+					),
+					h(
+						"label",
+						{ style: C.opt },
+						h("input", {
+							type: "radio",
+							name: "skill-dock-layout",
+							checked: layout === "chip",
+							onChange: () => write("entry", Object.assign({}, config.entry || {}, { layout: "chip" })),
+						}),
+						"单个总芯片",
+						h("span", { style: C.optNote }, "composer 卡片内 · 工具行右侧"),
+					),
+
+					h("div", { style: C.sub }, "分类与技能（别名在技能行右侧就地编辑）"),
+					nodes,
+
+					h("div", { style: C.sub }, "固定在 dock 栏的分类（按顺序展示）"),
+					pinNodes,
+
+					h(
+						"div",
+						{ style: C.status },
+						status === "ready"
+							? "配置已同步到 Host" + (snapshot && snapshot.writable === false ? "（只读）" : "")
+							: status === "loading"
+								? "正在读取配置…"
+								: "配置命名空间不可用",
+						CATALOG.names.length === 0 ? " · 打开一个会话后会加载技能列表用于选择" : "",
+					),
+				),
+			);
+		}
+
+		/* ------------------------------------------------------------------ *
 		 * Plugin body                                                         *
 		 * ------------------------------------------------------------------ */
 
@@ -529,6 +916,19 @@ window.__ModuleLoader__.load({
 					if (mounted) mounted();
 				};
 			}, "skill-dock: dock entry");
+
+			// The settings card is keyed by the namespace it edits, which is how
+			// the plugin-configuration tab pairs Host namespace and card.
+			ctx.slots.inject("settings.plugin.item", () =>
+				ctx.slots.register(
+					{
+						name: "settings.plugin.item",
+						key: "skill-dock",
+						inject: () => ({ scope, hooks: { config: scope } }),
+					},
+					SettingsCard,
+				),
+			);
 		}
 
 		const inject = ["slots", "remote", "remote.skills", "settingsScope"];
