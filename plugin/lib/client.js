@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
 		 * it renders in the settings card's status line. Bump it whenever the
 		 * behaviour someone is verifying changes.
 		 */
-		const BUILD = "b44";
+		const BUILD = "b45";
 
 		/** Style tag id: the official bundles inject CSS the same way. */
 		const CSS_ID = "dsh-plugin-changhai-skill-dock/search.css";
@@ -1011,7 +1011,7 @@ window.__ModuleLoader__.load({
 							"span",
 							{ style: { display: "flex", gap: "10px", alignItems: "center" } },
 							h("button", { style: S.btnGhost, onClick: closePanel }, "取消"),
-							h("button", { style: S.btnPrimary, onClick: confirm }, "确认插入"),
+							h("button", { style: S.btnPrimary, onClick: confirm }, "确认"),
 						),
 					),
 				),
@@ -1249,8 +1249,21 @@ window.__ModuleLoader__.load({
 
 			/* -------- pins -------- */
 
+			// Render in dock order, not in category-creation order: `dock.pinned`
+			// is authoritative for display, so 上移/下移 must move the row here too
+			// — otherwise the strip reorders while this list looks frozen. Checked
+			// categories come first, in pinned order, then the unchecked ones in
+			// their original category order (stable sort keeps that tie-break).
+			const pinOrderList = categories
+				.slice()
+				.sort((a, b) => {
+					const ia = pinned.indexOf(a.id);
+					const ib = pinned.indexOf(b.id);
+					return (ia < 0 ? Number.MAX_SAFE_INTEGER : ia) - (ib < 0 ? Number.MAX_SAFE_INTEGER : ib);
+				});
+
 			const pinNodes = categories.length
-				? categories.map((category) => {
+				? pinOrderList.map((category) => {
 						const on = pinned.indexOf(category.id) >= 0;
 						return h(
 							"div",
